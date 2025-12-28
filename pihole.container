@@ -1,7 +1,5 @@
 [Unit]
 Description=Pi-Hole
-Requires=unbound.service
-After=unbound.service
 
 [Container]
 ContainerName=pihole

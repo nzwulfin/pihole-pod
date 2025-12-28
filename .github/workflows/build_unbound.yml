@@ -2,6 +2,10 @@ name: Build image with GHA
 on:
   workflow_dispatch:
   push:
+    paths: 
+      - 'Containerfile.unbound'
+    branches:
+      - main
 
 jobs:
   unbound-image-build:
