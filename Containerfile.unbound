@@ -1,4 +1,4 @@
-FROM quay.io/fedora/fedora-minimal
+FROM quay.io/fedora/fedora-minimal:latest
 
 RUN dnf -y install unbound
 
