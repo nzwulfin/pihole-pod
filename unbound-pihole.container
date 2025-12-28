@@ -3,7 +3,7 @@ Description=Unbound recursive DNS for Pi-hole
 
 [Container]
 Pod=pihole.pod
-ContainerName=unbound
+ContainerName=unbound-pihole
 Image=localhost/ubtest
 
 [Service]
