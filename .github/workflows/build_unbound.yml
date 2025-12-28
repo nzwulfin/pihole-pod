@@ -57,7 +57,6 @@ jobs:
           registry: ${{ env.DEST_REGISTRY_HOST }}
           username: ${{ env.DEST_REGISTRY_USER }}
           password: ${{ env.DEST_REGISTRY_PASSWORD }}
-          auth_file_path: /run/containers/0/auth.json
 
       - name: Push to destination container Repository
         id: push-to-dest
