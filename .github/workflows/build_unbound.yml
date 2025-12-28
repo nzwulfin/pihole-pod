@@ -55,8 +55,8 @@ jobs:
         uses: redhat-actions/podman-login@v1
         with:
           registry: ${{ env.DEST_REGISTRY_HOST }}
-          username: ${{ secrets.DEST_REGISTRY_USER }}
-          password: ${{ secrets.DEST_REGISTRY_PASSWORD }}
+          username: ${{ env.DEST_REGISTRY_USER }}
+          password: ${{ env.DEST_REGISTRY_PASSWORD }}
           auth_file_path: /run/containers/0/auth.json
 
       - name: Push to destination container Repository
