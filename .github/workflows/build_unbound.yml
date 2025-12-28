@@ -22,7 +22,7 @@ jobs:
       DEST_REGISTRY_PASSWORD: "${{ secrets.GITHUB_TOKEN }}"
 
       # Destination image namespace and name (eg: myrepo/myimage)
-      DEST_IMAGE: "${{ github.actor }}/ubound"
+      DEST_IMAGE: "${{ github.actor }}/unbound"
 
     permissions:
       contents: write
