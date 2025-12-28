@@ -8,8 +8,8 @@ Pod=pihole.pod
 
 AutoUpdate=registry
 
-Volume=pihole-etc.volume:/etc/pihole
-Volume=pihole-dnsmasq.volume:/etc/dnsmasq.d
+Volume=pihole-etc.volume:/etc/pihole:z
+Volume=pihole-dnsmasq.volume:/etc/dnsmasq.d:z
 
 Environment=TZ="America/New_York"
 
