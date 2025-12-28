@@ -1,0 +1,7 @@
+FROM quay.io/fedora/fedora-minimal
+
+RUN dnf -y install unbound
+
+COPY unbound-pihole.conf /etc/unbound/conf.d
+
+ENTRYPOINT ["unbound"]

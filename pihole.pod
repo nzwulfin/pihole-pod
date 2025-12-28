@@ -1,0 +1,5 @@
+[Pod]
+PublishPort=8086:80
+PublishPort=53:53/tcp
+PublishPort=53:53/udp
+

@@ -1,0 +1,69 @@
+name: Build image with GHA
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  unbound-image-build:
+    name: Build RHEL bootc image with repo access
+    runs-on: ubuntu-latest
+    env:
+      
+      # Containerfile to build
+      CONTAINERFILE: Containerfile.unbound
+
+      # List of tags to publish
+      TAGLIST: latest ${{ github.sha }} ${{ github.ref_name }}
+
+      # Destination registry for built images
+      DEST_REGISTRY_HOST: "ghcr.io"
+      # Destination credentials - uses platform variables and secrets
+      DEST_REGISTRY_USER: "${{ github.actor }}"
+      DEST_REGISTRY_PASSWORD: "${{ secrets.GITHUB_TOKEN }}"
+
+      # Destination image namespace and name (eg: myrepo/myimage)
+      DEST_IMAGE: "${{ github.actor }}/ubound"
+
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Clone the repository
+        uses: actions/checkout@v4
+
+      - name: Get container tools in UBI builder
+        run: dnf -y install podman buildah skopeo
+
+      # workaround for https://github.com/redhat-actions/podman-login/issues/42 since the docker config from the host doesn't come up to the container
+      - name: Workaround open podman-login action issue
+        env:
+          auth: "{ \"auths\": {} }"
+        run: |
+          mkdir -p $HOME/.docker
+          echo $auth > $HOME/.docker/config.json
+
+      - name: Use buildah bud to create the image
+        id: build-image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: ${{ env.DEST_IMAGE }}
+          tags: ${{ env.TAGLIST }}
+          containerfiles: ${{ env.CONTAINERFILE }}
+
+      - name: Log in to the destination container registry
+        uses: redhat-actions/podman-login@v1
+        with:
+          registry: ${{ env.DEST_REGISTRY_HOST }}
+          username: ${{ secrets.DEST_REGISTRY_USER }}
+          password: ${{ secrets.DEST_REGISTRY_PASSWORD }}
+          auth_file_path: /run/containers/0/auth.json
+
+      - name: Push to destination container Repository
+        id: push-to-dest
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build-image.outputs.image }}
+          tags: ${{ steps.build-image.outputs.tags }}
+          registry: ${{ env.DEST_REGISTRY_HOST }}
+

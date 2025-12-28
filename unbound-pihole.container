@@ -1,0 +1,15 @@
+[Unit]
+Description=Unbound recursive DNS for Pi-hole
+
+[Container]
+Pod=pihole.pod
+ContainerName=unbound-pihole
+Image=localhost/ubtest
+#Image=ghcr.io/nzwulfin/unbound:latest
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+ 
+[Install]
+WantedBy=default.target
