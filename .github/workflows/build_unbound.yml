@@ -4,6 +4,7 @@ on:
   push:
     paths: 
       - 'Containerfile.unbound'
+      - 'unbound-pihole.conf'
     branches:
       - main
 
