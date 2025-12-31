@@ -8,11 +8,11 @@ Pod=pihole.pod
 Volume=pihole-etc.volume:/etc/pihole:z
 Volume=pihole-dnsmasq.volume:/etc/dnsmasq.d:z
 Environment=TZ="America/New_York"
+AutoUpdate=registry
 
 [Service]
 Restart=on-failure
 TimeoutStartSec=300
-AutoUpdate=registry
 
 [Install]
 WantedBy=default.target

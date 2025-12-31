@@ -6,11 +6,11 @@ Pod=pihole.pod
 ContainerName=unbound-pihole
 Image=ghcr.io/nzwulfin/unbound:latest
 AddCapability=CAP_NET_ADMIN
+AutoUpdate=registry
 
 [Service]
 Restart=on-failure
 TimeoutStartSec=300
-AutoUpdate=registry
  
 [Install]
 WantedBy=default.target
