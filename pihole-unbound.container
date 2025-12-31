@@ -10,6 +10,7 @@ AddCapability=CAP_NET_ADMIN
 [Service]
 Restart=on-failure
 TimeoutStartSec=300
+AutoUpdate=registry
  
 [Install]
 WantedBy=default.target
