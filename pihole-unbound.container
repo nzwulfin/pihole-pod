@@ -5,6 +5,7 @@ Description=Unbound recursive DNS for Pi-hole
 Pod=pihole.pod
 ContainerName=unbound-pihole
 Image=ghcr.io/nzwulfin/unbound:latest
+AddCapability=CAP_NET_ADMIN
 
 [Service]
 Restart=on-failure
