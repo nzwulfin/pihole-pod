@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     paths: 
-      - 'Containerfile.unbound'
+      #- 'Containerfile.unbound'
       - 'Dockerfile.unbound'
       - 'unbound-pihole.conf'
     branches:
