@@ -16,7 +16,7 @@ jobs:
     env:
       
       # Containerfile to build
-      CONTAINERFILE: Containerfile.unbound
+      CONTAINERFILE: Dockerfile.unbound
 
       # List of tags to publish
       TAGLIST: latest ${{ github.sha }} ${{ github.ref_name }}
