@@ -9,13 +9,12 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-  
   # Maintain dependencies for the bootc container
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
-      interval: "daily"
-      time: "04:00"
+      interval: "cron"
+      cronjob: "0 4 * * *"
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
