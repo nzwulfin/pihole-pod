@@ -1,4 +1,4 @@
-FROM quay.io/fedora/fedora@sha256:f4a8e09e74e128e58abcd999534063ab171fd6f3b63a297faedb9504dd9a63cc
+FROM quay.io/fedora/fedora@sha256:33c5a5a12962ce7c004d2ed308dee81c5afa667e7f474daf055ac26e88d06ce3
 
 RUN dnf -y install unbound
 
