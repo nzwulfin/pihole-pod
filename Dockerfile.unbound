@@ -1,7 +1,4 @@
-FROM quay.io/fedora/fedora@sha256:5d41b767ca6351e16dbe10b66b55391069476a0c8d01bf4746b76f43cb7242da
-
-RUN dnf -y install unbound
+FROM registry.access.redhat.com/hi/unbound@sha256:5ccd8fd8ecae3a917e525f714875417aee855e2691810fe6e374a53586ddc691
 
 COPY unbound-pihole.conf /etc/unbound/conf.d
 
-ENTRYPOINT ["unbound"]
