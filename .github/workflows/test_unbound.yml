@@ -1,0 +1,60 @@
+name: Test unbound image on PR
+on:
+  pull_request:
+    paths:
+      - 'Dockerfile.unbound'
+      - 'unbound-pihole.conf'
+    branches:
+      - main
+
+jobs:
+  test-unbound:
+    name: Test recursive DNS unbound container
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone the repository
+        uses: actions/checkout@v6
+
+      - name: Get container tools
+        run: sudo apt-get -y install podman buildah
+
+      - name: Workaround open podman-login action issue
+        env:
+          auth: "{ \"auths\": {} }"
+        run: |
+          mkdir -p $HOME/.docker
+          echo $auth > $HOME/.docker/config.json
+
+      - name: Build image
+        id: build-image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: unbound-test
+          tags: pr-${{ github.event.pull_request.number }}
+          containerfiles: Dockerfile.unbound
+
+      - name: Create pod
+        run: podman pod create --name test-unbound-pod
+
+      - name: Start unbound in pod
+        run: |
+          podman run -d \
+            --pod test-unbound-pod \
+            --name test-unbound \
+            localhost/unbound-test:pr-${{ github.event.pull_request.number }}
+          sleep 3
+
+      - name: DNS resolution over pod localhost
+        run: |
+          result=$(podman run --rm \
+            --pod test-unbound-pod \
+            docker.io/alpine \
+            sh -c 'apk add -q bind-tools && dig @127.0.0.1 -p 5335 example.com +short')
+          echo "Result: ${result}"
+          [[ -n "${result}" ]] || { echo "FAIL: no response from unbound at 127.0.0.1:5335"; exit 1; }
+          echo "PASS"
+
+      - name: Cleanup pod
+        if: always()
+        run: podman pod rm -f test-unbound-pod 2>/dev/null || true
