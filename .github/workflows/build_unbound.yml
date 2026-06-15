@@ -57,6 +57,31 @@ jobs:
           tags: ${{ env.TAGLIST }}
           containerfiles: ${{ env.CONTAINERFILE }}
 
+      - name: Test - Create pod for unbound
+        run: podman pod create --name test-unbound-pod
+
+      - name: Test - Start unbound in pod
+        run: |
+          podman run -d \
+              --pod test-unbound-pod \
+              --name test-unbound \
+              localhost/${{ steps.build-image.outputs.image }}:${{ github.sha }}
+          sleep 3
+
+      - name: Test - DNS resolution over pod localhost
+        run: |
+          result=$(podman run --rm \
+              --pod test-unbound-pod \
+              docker.io/alpine \
+              sh -c 'apk add -q bind-tools && dig @127.0.0.1 -p 5335 example.com +short')
+            echo "Result: ${result}"
+            [[ -n "${result}" ]] || { echo "FAIL: no response from unbound at 127.0.0.1:5335"; exit 1; }
+            echo "PASS"
+
+      - name: Test - Cleanup pod
+        if: always()
+        run: podman pod rm -f test-unbound-pod 2>/dev/null || true
+
       - name: Log in to the destination container registry
         uses: redhat-actions/podman-login@v1
         with:
