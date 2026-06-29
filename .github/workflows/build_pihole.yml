@@ -24,8 +24,8 @@ jobs:
       # Build context directory
       CONTEXT: pihole/
 
-      # List of tags to publish
-      TAGLIST: latest ${{ github.sha }} ${{ github.ref_name }}
+      # List of tags to publish — latest is applied by integrate_pod.yml after integration test passes
+      TAGLIST: ${{ github.sha }} ${{ github.ref_name }}
 
       # Destination registry for built images
       DEST_REGISTRY_HOST: "ghcr.io"

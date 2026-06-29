@@ -1,4 +1,4 @@
-name: Build image with GHA
+name: Build unbound image with GHA
 on:
   workflow_dispatch:
   push:
@@ -18,8 +18,8 @@ jobs:
       # Containerfile to build
       CONTAINERFILE: Dockerfile.unbound
 
-      # List of tags to publish
-      TAGLIST: latest ${{ github.sha }} ${{ github.ref_name }}
+      # List of tags to publish — latest is applied by integrate_pod.yml after integration test passes
+      TAGLIST: ${{ github.sha }} ${{ github.ref_name }}
 
       # Destination registry for built images
       DEST_REGISTRY_HOST: "ghcr.io"

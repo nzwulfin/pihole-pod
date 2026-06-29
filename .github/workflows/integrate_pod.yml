@@ -1,0 +1,126 @@
+name: Pod integration test and promote
+
+on:
+  workflow_run:
+    workflows:
+      - "Build pihole image with GHA"
+      - "Build unbound image with GHA"
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      new_image:
+        description: 'Which image was updated'
+        required: true
+        type: choice
+        options: [pihole, unbound]
+      image_sha:
+        description: 'Full commit SHA used as the image tag'
+        required: true
+
+jobs:
+  integrate-and-promote:
+    name: Test pod and promote to latest
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+
+    permissions:
+      packages: write
+
+    env:
+      NEW_IMAGE: ${{ github.event_name == 'workflow_dispatch' && inputs.new_image || (github.event.workflow_run.name == 'Build pihole image with GHA' && 'pihole' || 'unbound') }}
+      SHA: ${{ github.event_name == 'workflow_dispatch' && inputs.image_sha || github.event.workflow_run.head_sha }}
+
+    steps:
+      - name: Set image tags
+        run: |
+          echo "PIHOLE_TAG=${{ env.NEW_IMAGE == 'pihole' && env.SHA || 'latest' }}" >> $GITHUB_ENV
+          echo "UNBOUND_TAG=${{ env.NEW_IMAGE == 'unbound' && env.SHA || 'latest' }}" >> $GITHUB_ENV
+
+      - name: Get container tools
+        run: sudo apt-get -y install podman skopeo
+
+      - name: Workaround open podman-login action issue
+        env:
+          auth: "{ \"auths\": {} }"
+        run: |
+          mkdir -p $HOME/.docker
+          echo $auth > $HOME/.docker/config.json
+
+      - name: Log in to GHCR
+        uses: redhat-actions/podman-login@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create test pod
+        run: podman pod create --name test-pod
+
+      - name: Start unbound
+        run: |
+          podman run -d \
+            --pod test-pod \
+            --name test-unbound \
+            --cap-add CAP_NET_ADMIN \
+            ghcr.io/${{ github.actor }}/unbound:${{ env.UNBOUND_TAG }}
+          sleep 3
+
+      - name: Start pihole
+        run: |
+          podman run -d \
+            --pod test-pod \
+            --name test-pihole \
+            --cap-add CAP_NET_BIND_SERVICE \
+            --cap-add CAP_NET_RAW \
+            -e FTLCONF_webserver_api_password=test \
+            -e 'FTLCONF_dns_upstreams=["127.0.0.1#5335"]' \
+            ghcr.io/${{ github.actor }}/pihole:${{ env.PIHOLE_TAG }}
+
+      - name: Wait for FTL to start
+        run: |
+          timeout 90 bash -c \
+            'until podman logs test-pihole 2>&1 | grep -q "FTL started"; do sleep 2; done'
+
+      - name: Dump pihole logs
+        if: always()
+        run: podman logs test-pihole 2>&1 || true
+
+      - name: DNS resolution through full stack
+        run: |
+          for i in $(seq 1 10); do
+            result=$(podman run --rm \
+              --pod test-pod \
+              quay.io/hummingbird/dig:latest @127.0.0.1 google.com +short 2>/dev/null || true)
+            if [[ -n "${result}" ]]; then
+              echo "Result: ${result}"
+              echo "PASS"
+              exit 0
+            fi
+            echo "Attempt ${i}: no response yet, waiting..."
+            sleep 3
+          done
+          echo "FAIL: no DNS response after 10 attempts"
+          exit 1
+
+      - name: Admin web UI responds
+        run: |
+          result=$(podman run --rm \
+            --pod test-pod \
+            quay.io/hummingbird/curl:latest -s -o /dev/null -w "%{http_code}" \
+            http://127.0.0.1:80/admin/)
+          echo "HTTP status: ${result}"
+          [[ "${result}" =~ ^(200|302)$ ]] || { echo "FAIL: admin UI returned ${result}"; exit 1; }
+          echo "PASS"
+
+      - name: Cleanup
+        if: always()
+        run: podman pod rm -f test-pod 2>/dev/null || true
+
+      - name: Promote SHA tag to latest
+        run: |
+          skopeo copy \
+            --authfile $HOME/.docker/config.json \
+            docker://ghcr.io/${{ github.actor }}/${{ env.NEW_IMAGE }}:${{ env.SHA }} \
+            docker://ghcr.io/${{ github.actor }}/${{ env.NEW_IMAGE }}:latest
+
