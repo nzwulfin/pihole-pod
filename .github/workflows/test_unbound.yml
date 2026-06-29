@@ -2,8 +2,7 @@ name: Test unbound image on PR
 on:
   pull_request:
     paths:
-      - 'Dockerfile.unbound'
-      - 'unbound-pihole.conf'
+      - 'unbound/**'
     branches:
       - main
 
@@ -32,7 +31,8 @@ jobs:
         with:
           image: unbound-test
           tags: pr-${{ github.event.pull_request.number }}
-          containerfiles: Dockerfile.unbound
+          containerfiles: unbound/Containerfile
+          context: unbound/
 
       - name: Create pod
         run: podman pod create --name test-unbound-pod

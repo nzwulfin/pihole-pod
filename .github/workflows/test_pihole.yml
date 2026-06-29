@@ -2,12 +2,7 @@ name: Test pihole image on PR
 on:
   pull_request:
     paths:
-      - 'pihole/Dockerfile'
-      - 'pihole/bash_functions.sh'
-      - 'pihole/start.sh'
-      - 'pihole/pihole-FTL-prestart.sh'
-      - 'pihole/prefix-time.sh'
-      - 'pihole/crontab.txt'
+      - 'pihole/**'
     branches:
       - main
 
@@ -36,7 +31,7 @@ jobs:
         with:
           image: pihole-test
           tags: pr-${{ github.event.pull_request.number }}
-          containerfiles: pihole/Dockerfile
+          containerfiles: pihole/Containerfile
           context: pihole/
 
       - name: Create test pod

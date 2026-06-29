@@ -14,8 +14,9 @@
   "customManagers": [
     {
       "customType": "regex",
+      "description": "Track ARG-pinned versions (FTL, pihole-core, pihole-web, supercronic)",
       "managerFilePatterns": [
-        "/^pihole/Dockerfile$/"
+        "/^pihole/Containerfile$/"
       ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>[^\\s]+) depName=(?<depName>[^\\s]+)\\nARG [A-Z_]+=(?<currentValue>[^\\s]+)"

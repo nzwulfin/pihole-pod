@@ -3,12 +3,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'pihole/Dockerfile'
-      - 'pihole/bash_functions.sh'
-      - 'pihole/start.sh'
-      - 'pihole/pihole-FTL-prestart.sh'
-      - 'pihole/prefix-time.sh'
-      - 'pihole/crontab.txt'
+      - 'pihole/**'
     branches:
       - main
 
@@ -19,10 +14,7 @@ jobs:
     env:
 
       # Containerfile to build
-      CONTAINERFILE: pihole/Dockerfile
-
-      # Build context directory
-      CONTEXT: pihole/
+      CONTAINERFILE: pihole/Containerfile
 
       # List of tags to publish — latest is applied by integrate_pod.yml after integration test passes
       TAGLIST: ${{ github.sha }} ${{ github.ref_name }}
@@ -62,7 +54,7 @@ jobs:
           image: ${{ env.DEST_IMAGE }}
           tags: ${{ env.TAGLIST }}
           containerfiles: ${{ env.CONTAINERFILE }}
-          context: ${{ env.CONTEXT }}
+          context: pihole/
 
       - name: Log in to the destination container registry
         uses: redhat-actions/podman-login@v1

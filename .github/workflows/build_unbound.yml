@@ -2,10 +2,8 @@ name: Build unbound image with GHA
 on:
   workflow_dispatch:
   push:
-    paths: 
-      #- 'Containerfile.unbound'
-      - 'Dockerfile.unbound'
-      - 'unbound-pihole.conf'
+    paths:
+      - 'unbound/**'
     branches:
       - main
 
@@ -16,7 +14,7 @@ jobs:
     env:
       
       # Containerfile to build
-      CONTAINERFILE: Dockerfile.unbound
+      CONTAINERFILE: unbound/Containerfile
 
       # List of tags to publish — latest is applied by integrate_pod.yml after integration test passes
       TAGLIST: ${{ github.sha }} ${{ github.ref_name }}
@@ -56,6 +54,7 @@ jobs:
           image: ${{ env.DEST_IMAGE }}
           tags: ${{ env.TAGLIST }}
           containerfiles: ${{ env.CONTAINERFILE }}
+          context: unbound/
 
       - name: Log in to the destination container registry
         uses: redhat-actions/podman-login@v1
