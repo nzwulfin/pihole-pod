@@ -36,6 +36,9 @@ RUN --mount=type=bind,from=registry.access.redhat.com/hi/core-runtime:latest-bui
     tzdata \
     unzip
 
+RUN echo "pihole:x:65532:65532:Pi-hole:/:/sbin/nologin" >> /etc/passwd \
+    && echo "pihole:x:65532:" >> /etc/group
+
 ADD https://ftl.pi-hole.net/macvendor.db /macvendor.db
 
 RUN git clone --branch ${PIHOLE_CORE_VERSION} --single-branch --depth 1 \
