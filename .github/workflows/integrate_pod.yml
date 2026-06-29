@@ -34,13 +34,8 @@ jobs:
     steps:
       - name: Set image tags
         run: |
-          if [[ "${{ env.NEW_IMAGE }}" == "pihole" ]]; then
-            echo "PIHOLE_IMAGE=ghcr.io/${{ github.actor }}/pihole:${{ env.SHA }}" >> $GITHUB_ENV
-            echo "UNBOUND_IMAGE=ghcr.io/${{ github.actor }}/unbound:latest" >> $GITHUB_ENV
-          else
-            echo "PIHOLE_IMAGE=ghcr.io/${{ github.actor }}/pihole:latest" >> $GITHUB_ENV
-            echo "UNBOUND_IMAGE=ghcr.io/${{ github.actor }}/unbound:${{ env.SHA }}" >> $GITHUB_ENV
-          fi
+          echo "PIHOLE_TAG=${{ env.NEW_IMAGE == 'pihole' && env.SHA || 'latest' }}" >> $GITHUB_ENV
+          echo "UNBOUND_TAG=${{ env.NEW_IMAGE == 'unbound' && env.SHA || 'latest' }}" >> $GITHUB_ENV
 
       - name: Get container tools
         run: sudo apt-get -y install podman skopeo
@@ -68,7 +63,7 @@ jobs:
             --pod test-pod \
             --name test-unbound \
             --cap-add CAP_NET_ADMIN \
-            ${{ env.UNBOUND_IMAGE }}
+            ghcr.io/${{ github.actor }}/unbound:${{ env.UNBOUND_TAG }}
           sleep 3
 
       - name: Start pihole
@@ -80,7 +75,7 @@ jobs:
             --cap-add CAP_NET_RAW \
             -e FTLCONF_webserver_api_password=test \
             -e 'FTLCONF_dns_upstreams=["127.0.0.1#5335"]' \
-            ${{ env.PIHOLE_IMAGE }}
+            ghcr.io/${{ github.actor }}/pihole:${{ env.PIHOLE_TAG }}
 
       - name: Wait for FTL to start
         run: |
