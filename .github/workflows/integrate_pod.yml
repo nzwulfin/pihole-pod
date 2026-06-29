@@ -4,7 +4,7 @@ on:
   workflow_run:
     workflows:
       - "Build pihole image with GHA"
-      - "Build image with GHA"
+      - "Build unbound image with GHA"
     types: [completed]
     branches: [main]
   workflow_dispatch:
@@ -27,31 +27,11 @@ jobs:
     permissions:
       packages: write
 
-    steps:
-      - name: Resolve trigger context
-        id: ctx
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            NEW_IMAGE="${{ inputs.new_image }}"
-            SHA="${{ inputs.image_sha }}"
-          else
-            SHA="${{ github.event.workflow_run.head_sha }}"
-            if [[ "${{ github.event.workflow_run.name }}" == "Build pihole image with GHA" ]]; then
-              NEW_IMAGE="pihole"
-            else
-              NEW_IMAGE="unbound"
-            fi
-          fi
-          echo "new_image=${NEW_IMAGE}" >> $GITHUB_OUTPUT
-          echo "sha=${SHA}" >> $GITHUB_OUTPUT
-          if [[ "${NEW_IMAGE}" == "pihole" ]]; then
-            echo "pihole_image=ghcr.io/${{ github.actor }}/pihole:${SHA}" >> $GITHUB_OUTPUT
-            echo "unbound_image=ghcr.io/${{ github.actor }}/unbound:latest" >> $GITHUB_OUTPUT
-          else
-            echo "pihole_image=ghcr.io/${{ github.actor }}/pihole:latest" >> $GITHUB_OUTPUT
-            echo "unbound_image=ghcr.io/${{ github.actor }}/unbound:${SHA}" >> $GITHUB_OUTPUT
-          fi
+    env:
+      NEW_IMAGE: ${{ github.event_name == 'workflow_dispatch' && inputs.new_image || (github.event.workflow_run.name == 'Build pihole image with GHA' && 'pihole' || 'unbound') }}
+      SHA: ${{ github.event_name == 'workflow_dispatch' && inputs.image_sha || github.event.workflow_run.head_sha }}
 
+    steps:
       - name: Get container tools
         run: sudo apt-get -y install podman skopeo
 
@@ -78,7 +58,7 @@ jobs:
             --pod test-pod \
             --name test-unbound \
             --cap-add CAP_NET_ADMIN \
-            ${{ steps.ctx.outputs.unbound_image }}
+            ghcr.io/${{ github.actor }}/unbound:${{ env.NEW_IMAGE == 'unbound' && env.SHA || 'latest' }}
           sleep 3
 
       - name: Start pihole
@@ -90,7 +70,7 @@ jobs:
             --cap-add CAP_NET_RAW \
             -e FTLCONF_webserver_api_password=test \
             -e 'FTLCONF_dns_upstreams=["127.0.0.1#5335"]' \
-            ${{ steps.ctx.outputs.pihole_image }}
+            ghcr.io/${{ github.actor }}/pihole:${{ env.NEW_IMAGE == 'pihole' && env.SHA || 'latest' }}
 
       - name: Wait for FTL to start
         run: |
@@ -136,5 +116,5 @@ jobs:
         run: |
           skopeo copy \
             --authfile $HOME/.docker/config.json \
-            docker://ghcr.io/${{ github.actor }}/${{ steps.ctx.outputs.new_image }}:${{ steps.ctx.outputs.sha }} \
-            docker://ghcr.io/${{ github.actor }}/${{ steps.ctx.outputs.new_image }}:latest
+            docker://ghcr.io/${{ github.actor }}/${{ env.NEW_IMAGE }}:${{ env.SHA }} \
+            docker://ghcr.io/${{ github.actor }}/${{ env.NEW_IMAGE }}:latest

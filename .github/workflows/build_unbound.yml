@@ -1,4 +1,4 @@
-name: Build image with GHA
+name: Build unbound image with GHA
 on:
   workflow_dispatch:
   push:
