@@ -72,12 +72,20 @@ jobs:
 
       - name: DNS resolution through pi-hole
         run: |
-          result=$(podman run --rm \
-            --pod test-pihole-pod \
-            quay.io/hummingbird/dig:latest @127.0.0.1 pi.hole +short)
-          echo "Result: ${result}"
-          [[ -n "${result}" ]] || { echo "FAIL: no DNS response from pi-hole"; exit 1; }
-          echo "PASS"
+          for i in $(seq 1 10); do
+            result=$(podman run --rm \
+              --pod test-pihole-pod \
+              quay.io/hummingbird/dig:latest @127.0.0.1 pi.hole +short 2>/dev/null || true)
+            if [[ -n "${result}" ]]; then
+              echo "Result: ${result}"
+              echo "PASS"
+              exit 0
+            fi
+            echo "Attempt ${i}: no response yet, waiting..."
+            sleep 3
+          done
+          echo "FAIL: no DNS response from pi-hole after 10 attempts"
+          exit 1
 
       - name: Admin web UI responds
         run: |

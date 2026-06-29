@@ -85,7 +85,7 @@ ftl_config() {
     if [[ -z "${FTLCONF_files_macvendor:-}" ]]; then
         # User is not passing in a custom location - so force FTL to use the file we moved to / during the build
         setFTLConfigValue "files.macvendor" "/macvendor.db"
-        chown 65532:65532 /macvendor.db
+        chown pihole:pihole /macvendor.db
     fi
 
     # If getFTLConfigValue "dns.upstreams" returns [], default to Google's DNS server
@@ -104,9 +104,8 @@ migrate_v5_configs() {
     # avoid conflicts with other services on this system
     echo "  [i] Migrating dnsmasq configuration files"
     V6_CONF_MIGRATION_DIR="/etc/pihole/migration_backup_v6"
-    # Create target directory and make it owned by 65532:65532
     mkdir -p "${V6_CONF_MIGRATION_DIR}"
-    chown 65532:65532 "${V6_CONF_MIGRATION_DIR}"
+    chown pihole:pihole "${V6_CONF_MIGRATION_DIR}"
 
     # Move all conf files originally created by Pi-hole into this directory
     # - 01-pihole.conf

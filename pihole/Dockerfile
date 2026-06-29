@@ -14,7 +14,7 @@ ARG PIHOLE_WEB_VERSION=v6.5.1
 # renovate: datasource=github-releases depName=aptible/supercronic
 ARG SUPERCRONIC_VERSION=v0.2.33
 
-ENV DNSMASQ_USER=65532
+ENV DNSMASQ_USER=pihole
 ENV FTL_CMD=no-daemon
 
 RUN --mount=type=bind,from=registry.access.redhat.com/hi/core-runtime:latest-builder,target=/builder \
@@ -36,8 +36,8 @@ RUN --mount=type=bind,from=registry.access.redhat.com/hi/core-runtime:latest-bui
     tzdata \
     unzip
 
-RUN echo "pihole:x:65532:65532:Pi-hole:/:/sbin/nologin" >> /etc/passwd \
-    && echo "pihole:x:65532:" >> /etc/group
+RUN echo "pihole:x:1000:1000:Pi-hole:/:/sbin/nologin" >> /etc/passwd \
+    && echo "pihole:x:1000:" >> /etc/group
 
 ADD https://ftl.pi-hole.net/macvendor.db /macvendor.db
 

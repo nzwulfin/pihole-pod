@@ -1,10 +1,10 @@
 #!/usr/bin/env sh
 # Forked from upstream pi-hole/pi-hole advanced/Templates/pihole-FTL-prestart.sh
-# pihole user references changed to UID 65532 (Hummingbird built-in user)
+# pihole user references changed from numeric UIDs to the named pihole user
 
 # Ensure that permissions are set so that pihole-FTL can edit all necessary files
 mkdir -p /var/log/pihole
-chown -R 65532:65532 /etc/pihole/ /var/log/pihole/
+chown -R pihole:pihole /etc/pihole/ /var/log/pihole/
 
 # allow all users read version file (and use pihole -v)
 touch /etc/pihole/versions
@@ -22,5 +22,5 @@ chown root:root /etc/pihole/logrotate
 
 # Touch files to ensure they exist (create if non-existing, preserve if existing)
 # Hardcoded PID path — see GHSA-6w8x-p785-6pm4
-[ -f /run/pihole-FTL.pid ] || install -D -m 644 -o 65532 -g 65532 /dev/null /run/pihole-FTL.pid
-[ -f /etc/pihole/dhcp.leases ] || install -m 644 -o 65532 -g 65532 /dev/null /etc/pihole/dhcp.leases
+[ -f /run/pihole-FTL.pid ] || install -D -m 644 -o pihole -g pihole /dev/null /run/pihole-FTL.pid
+[ -f /etc/pihole/dhcp.leases ] || install -m 644 -o pihole -g pihole /dev/null /etc/pihole/dhcp.leases
