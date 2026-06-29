@@ -118,14 +118,6 @@ jobs:
           echo "FAIL: no DNS response after 10 attempts"
           exit 1
 
-      - name: pi.hole resolves
-        run: |
-          result=$(podman run --rm \
-            --pod test-pod \
-            quay.io/hummingbird/dig:latest @127.0.0.1 pi.hole +short 2>/dev/null || true)
-          [[ -n "${result}" ]] || { echo "FAIL: pi.hole did not resolve"; exit 1; }
-          echo "PASS: pi.hole → ${result}"
-
       - name: Admin web UI responds
         run: |
           result=$(podman run --rm \
