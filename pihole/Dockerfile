@@ -9,6 +9,10 @@ ARG FTL_VERSION=v6.6.2
 ARG PIHOLE_CORE_VERSION=v6.4.2
 # renovate: datasource=github-releases depName=pi-hole/web
 ARG PIHOLE_WEB_VERSION=v6.5.1
+# cronie is not in the Hummingbird repo; supercronic is a static binary drop-in
+# designed for containers: reads crontab files directly, logs to stdout, handles SIGTERM
+# renovate: datasource=github-releases depName=aptible/supercronic
+ARG SUPERCRONIC_VERSION=v0.2.33
 
 ENV DNSMASQ_USER=65532
 ENV FTL_CMD=no-daemon
@@ -23,12 +27,10 @@ RUN --mount=type=bind,from=registry.access.redhat.com/hi/core-runtime:latest-bui
     --setopt=tsflags=nodocs \
     bind-utils \
     binutils \
-    coreutils \
     curl \
     git \
     iproute \
     logrotate \
-    cronie \
     procps-ng \
     psmisc \
     tzdata \
@@ -66,6 +68,11 @@ RUN curl -sSL \
     -o /usr/bin/pihole-FTL \
     && chmod +x /usr/bin/pihole-FTL \
     && readelf -h /usr/bin/pihole-FTL || (echo "Error with FTL binary" && exit 1)
+
+RUN curl -sSL \
+    "https://github.com/aptible/supercronic/releases/download/${SUPERCRONIC_VERSION}/supercronic-linux-amd64" \
+    -o /usr/bin/supercronic \
+    && chmod +x /usr/bin/supercronic
 
 EXPOSE 53 53/udp
 EXPOSE 80

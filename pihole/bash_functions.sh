@@ -29,18 +29,15 @@ setFTLConfigValue() {
 }
 
 start_cron() {
-    echo "  [i] Starting crond for scheduled scripts. Randomizing times for gravity and update checker"
+    echo "  [i] Starting supercronic for scheduled scripts. Randomizing times for gravity and update checker"
     # Randomize gravity update time
     sed -i "s/59 1 /$((1 + RANDOM % 58)) $((3 + RANDOM % 2))/" /crontab.txt
     # Randomize update checker time
     sed -i "s/59 17/$((1 + RANDOM % 58)) $((12 + RANDOM % 8))/" /crontab.txt
-    if ! /usr/bin/crontab /crontab.txt; then
-        echo "  [!] Failed to install crontab - scheduled tasks (gravity, update checker) will not run"
-    fi
 
-    # Run crond in foreground, prefix each line from STDIN/STDOUT with the current date/time/timezone and
-    # write to PID 1 STDOUT (docker log)
-    { /usr/sbin/crond -f -d 6 |& prefix-time.sh; } &
+    # supercronic reads the crontab file directly; no crontab(1) install step needed
+    # cronie is not in the Hummingbird repo — see Dockerfile for rationale
+    { /usr/bin/supercronic /crontab.txt |& prefix-time.sh; } &
     echo ""
 }
 
