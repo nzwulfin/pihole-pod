@@ -49,8 +49,7 @@ jobs:
         run: |
           result=$(podman run --rm \
             --pod test-unbound-pod \
-            docker.io/alpine \
-            sh -c 'apk add -q bind-tools && dig @127.0.0.1 -p 5335 example.com +short')
+            quay.io/hummingbird/dig:latest @127.0.0.1 -p 5335 example.com +short')
           echo "Result: ${result}"
           [[ -n "${result}" ]] || { echo "FAIL: no response from unbound at 127.0.0.1:5335"; exit 1; }
           echo "PASS"
