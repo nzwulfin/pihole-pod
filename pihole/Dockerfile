@@ -36,7 +36,7 @@ RUN --mount=type=bind,from=registry.access.redhat.com/hi/core-runtime:latest-bui
     tzdata \
     unzip
 
-ADD --link https://ftl.pi-hole.net/macvendor.db /macvendor.db
+ADD https://ftl.pi-hole.net/macvendor.db /macvendor.db
 
 RUN git clone --branch ${PIHOLE_CORE_VERSION} --single-branch --depth 1 \
     https://github.com/pi-hole/pi-hole.git /etc/.pihole \
