@@ -1,0 +1,90 @@
+name: Test pihole image on PR
+on:
+  pull_request:
+    paths:
+      - 'pihole/Dockerfile'
+      - 'pihole/bash_functions.sh'
+      - 'pihole/start.sh'
+      - 'pihole/pihole-FTL-prestart.sh'
+      - 'pihole/prefix-time.sh'
+      - 'pihole/crontab.txt'
+    branches:
+      - main
+
+jobs:
+  test-pihole:
+    name: Test pi-hole container in pod
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone the repository
+        uses: actions/checkout@v7
+
+      - name: Get container tools
+        run: sudo apt-get -y install podman buildah
+
+      - name: Workaround open podman-login action issue
+        env:
+          auth: "{ \"auths\": {} }"
+        run: |
+          mkdir -p $HOME/.docker
+          echo $auth > $HOME/.docker/config.json
+
+      - name: Build pi-hole image
+        id: build-image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: pihole-test
+          tags: pr-${{ github.event.pull_request.number }}
+          containerfiles: pihole/Dockerfile
+          context: pihole/
+
+      - name: Create test pod
+        run: podman pod create --name test-pihole-pod
+
+      - name: Start unbound in pod
+        run: |
+          podman run -d \
+            --pod test-pihole-pod \
+            --name test-unbound \
+            --cap-add CAP_NET_ADMIN \
+            ghcr.io/nzwulfin/unbound:latest
+          sleep 3
+
+      - name: Start pi-hole in pod
+        run: |
+          podman run -d \
+            --pod test-pihole-pod \
+            --name test-pihole \
+            --cap-add CAP_NET_BIND_SERVICE \
+            --cap-add CAP_NET_RAW \
+            -e FTLCONF_webserver_api_password=test \
+            localhost/pihole-test:pr-${{ github.event.pull_request.number }}
+
+      - name: Wait for FTL to start
+        run: |
+          timeout 60 bash -c \
+            'until podman logs test-pihole 2>&1 | grep -q "FTL started"; do sleep 2; done'
+
+      - name: DNS resolution through pi-hole
+        run: |
+          result=$(podman run --rm \
+            --pod test-pihole-pod \
+            quay.io/hummingbird/dig:latest @127.0.0.1 pi.hole +short)
+          echo "Result: ${result}"
+          [[ -n "${result}" ]] || { echo "FAIL: no DNS response from pi-hole"; exit 1; }
+          echo "PASS"
+
+      - name: Admin web UI responds
+        run: |
+          result=$(podman run --rm \
+            --pod test-pihole-pod \
+            quay.io/hummingbird/curl:latest -s -o /dev/null -w "%{http_code}" \
+            http://127.0.0.1:80/admin/)
+          echo "HTTP status: ${result}"
+          [[ "${result}" =~ ^(200|302)$ ]] || { echo "FAIL: admin UI returned ${result}"; exit 1; }
+          echo "PASS"
+
+      - name: Cleanup
+        if: always()
+        run: podman pod rm -f test-pihole-pod 2>/dev/null || true
