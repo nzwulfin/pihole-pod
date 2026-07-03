@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM registry.access.redhat.com/hi/core-runtime@sha256:47c4393878ee5848f91d9538dbe742b8cd04da6d1db80286c293460eeb5b1a6c
+FROM registry.access.redhat.com/hi/core-runtime@sha256:9c7c8552fee26f6ae292e5f959a1987ab141f6bad69be0e3063686c86dbaf1a4
 USER root
 
 # renovate: datasource=github-releases depName=pi-hole/FTL
