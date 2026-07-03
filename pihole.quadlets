@@ -18,7 +18,7 @@ TimeoutStartSec=300
 [Install]
 WantedBy=default.target
 ---
-# FileName=pihole.pod
+# FileName=pihole-pod
 [Pod]
 PublishPort=8086:80
 PublishPort=53:53/tcp
