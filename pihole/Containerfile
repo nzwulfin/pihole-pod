@@ -12,7 +12,7 @@ ARG PIHOLE_WEB_VERSION=v6.5.1
 # cronie is not in the Hummingbird repo; supercronic is a static binary drop-in
 # designed for containers: reads crontab files directly, logs to stdout, handles SIGTERM
 # renovate: datasource=github-releases depName=aptible/supercronic
-ARG SUPERCRONIC_VERSION=v0.2.33
+ARG SUPERCRONIC_VERSION=v0.2.47
 
 ENV DNSMASQ_USER=pihole
 ENV FTL_CMD=no-daemon
