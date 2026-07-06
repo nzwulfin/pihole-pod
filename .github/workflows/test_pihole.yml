@@ -3,12 +3,14 @@ on:
   pull_request:
     paths:
       - 'pihole/**'
+      - '.github/workflows/test_pihole.yml'
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   test-pihole:
-    name: Test pi-hole container in pod
+    name: Test pi-hole container standalone
     runs-on: ubuntu-latest
 
     steps:
@@ -30,36 +32,28 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           image: pihole-test
-          tags: pr-${{ github.event.pull_request.number }}
+          tags: ${{ github.event.pull_request.number && format('pr-{0}', github.event.pull_request.number) || 'test' }}
           containerfiles: pihole/Containerfile
           context: pihole/
 
-      - name: Create test pod
-        run: podman pod create --name test-pihole-pod
-
-      - name: Start unbound in pod
+      - name: Start pi-hole container
         run: |
           podman run -d \
-            --pod test-pihole-pod \
-            --name test-unbound \
-            --cap-add CAP_NET_ADMIN \
-            ghcr.io/nzwulfin/unbound:latest
-          sleep 3
-
-      - name: Start pi-hole in pod
-        run: |
-          podman run -d \
-            --pod test-pihole-pod \
             --name test-pihole \
             --cap-add CAP_NET_BIND_SERVICE \
             --cap-add CAP_NET_RAW \
+            -p 8053:53/udp -p 8053:53/tcp -p 8080:80/tcp \
             -e FTLCONF_webserver_api_password=test \
-            localhost/pihole-test:pr-${{ github.event.pull_request.number }}
+            localhost/pihole-test:${{ github.event.pull_request.number && format('pr-{0}', github.event.pull_request.number) || 'test' }}
 
-      - name: Wait for FTL to start
+      - name: Wait for DNS to be ready
         run: |
-          timeout 90 bash -c \
-            'until podman logs test-pihole 2>&1 | grep -q "FTL started"; do sleep 2; done'
+          for i in $(seq 1 30); do
+            result=$(dig @127.0.0.1 -p 8053 example.com +short 2>&1) && break
+            echo "Attempt ${i}: DNS not ready yet, waiting..."
+            sleep 3
+          done
+          echo "Readiness probe result: ${result}"
 
       - name: Dump pi-hole container logs
         if: always()
@@ -67,31 +61,19 @@ jobs:
 
       - name: DNS resolution through pi-hole
         run: |
-          for i in $(seq 1 10); do
-            result=$(podman run --rm \
-              --pod test-pihole-pod \
-              quay.io/hummingbird/dig:latest @127.0.0.1 pi.hole +short 2>/dev/null || true)
-            if [[ -n "${result}" ]]; then
-              echo "Result: ${result}"
-              echo "PASS"
-              exit 0
-            fi
-            echo "Attempt ${i}: no response yet, waiting..."
-            sleep 3
-          done
-          echo "FAIL: no DNS response from pi-hole after 10 attempts"
-          exit 1
+          result=$(dig @127.0.0.1 -p 8053 example.com +short)
+          echo "Result: ${result}"
+          expected="93.184.215.14"
+          [[ "${result}" == *"${expected}"* ]] || { echo "FAIL: expected ${expected}, got ${result}"; exit 1; }
+          echo "PASS"
 
       - name: Admin web UI responds
         run: |
-          result=$(podman run --rm \
-            --pod test-pihole-pod \
-            quay.io/hummingbird/curl:latest -s -o /dev/null -w "%{http_code}" \
-            http://127.0.0.1:80/admin/)
+          result=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/admin/)
           echo "HTTP status: ${result}"
           [[ "${result}" =~ ^(200|302)$ ]] || { echo "FAIL: admin UI returned ${result}"; exit 1; }
           echo "PASS"
 
       - name: Cleanup
         if: always()
-        run: podman pod rm -f test-pihole-pod 2>/dev/null || true
+        run: podman rm -f test-pihole 2>/dev/null || true
