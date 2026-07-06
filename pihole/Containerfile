@@ -3,6 +3,7 @@
 # Stage 1: build-time preparation
 # Clone upstream repos, download binaries, extract scripts, strip .git dirs
 FROM registry.access.redhat.com/hi/core-runtime:latest-builder AS builder
+USER root
 
 # renovate: datasource=github-releases depName=pi-hole/FTL
 ARG FTL_VERSION=v6.6.2
