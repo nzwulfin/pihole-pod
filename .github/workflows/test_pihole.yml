@@ -38,9 +38,11 @@ jobs:
 
       - name: Establish DNS ground truth
         run: |
-          expected=$(dig example.com +short | head -1)
+          expected=$(dig example.com +short | sort)
           echo "Host resolver says example.com = ${expected}"
-          echo "EXPECTED_IP=${expected}" >> $GITHUB_ENV
+          echo "EXPECTED_IP<<EOF" >> $GITHUB_ENV
+          echo "${expected}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Start pi-hole container
         run: |
@@ -67,7 +69,7 @@ jobs:
 
       - name: DNS resolution through pi-hole
         run: |
-          result=$(dig @127.0.0.1 -p 8053 example.com +short | head -1)
+          result=$(dig @127.0.0.1 -p 8053 example.com +short | sort)
           echo "Result: ${result}"
           echo "Expected: ${EXPECTED_IP}"
           [[ "${result}" == "${EXPECTED_IP}" ]] || { echo "FAIL: expected ${EXPECTED_IP}, got ${result}"; exit 1; }
