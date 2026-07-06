@@ -54,6 +54,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Establish DNS ground truth
+        run: |
+          expected=$(dig example.com +short | sort)
+          echo "Host resolver says example.com = ${expected}"
+          echo "EXPECTED_IP<<EOF" >> $GITHUB_ENV
+          echo "${expected}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
       - name: Create test pod
         run: podman pod create --name test-pod
 
@@ -74,13 +82,19 @@ jobs:
             --cap-add CAP_NET_BIND_SERVICE \
             --cap-add CAP_NET_RAW \
             -e FTLCONF_webserver_api_password=test \
-            -e 'FTLCONF_dns_upstreams=["127.0.0.1#5335"]' \
+            -e FTLCONF_dns_upstreams=127.0.0.1#5335 \
             ghcr.io/${{ github.actor }}/pihole:${{ env.PIHOLE_TAG }}
 
-      - name: Wait for FTL to start
+      - name: Wait for DNS to be ready
         run: |
-          timeout 90 bash -c \
-            'until podman logs test-pihole 2>&1 | grep -q "FTL started"; do sleep 2; done'
+          for i in $(seq 1 30); do
+            result=$(podman run --rm \
+              --pod test-pod \
+              quay.io/hummingbird/dig:latest @127.0.0.1 example.com +short 2>&1) && break
+            echo "Attempt ${i}: DNS not ready yet, waiting..."
+            sleep 3
+          done
+          echo "Readiness probe result: ${result}"
 
       - name: Dump pihole logs
         if: always()
@@ -88,20 +102,13 @@ jobs:
 
       - name: DNS resolution through full stack
         run: |
-          for i in $(seq 1 10); do
-            result=$(podman run --rm \
-              --pod test-pod \
-              quay.io/hummingbird/dig:latest @127.0.0.1 google.com +short 2>/dev/null || true)
-            if [[ -n "${result}" ]]; then
-              echo "Result: ${result}"
-              echo "PASS"
-              exit 0
-            fi
-            echo "Attempt ${i}: no response yet, waiting..."
-            sleep 3
-          done
-          echo "FAIL: no DNS response after 10 attempts"
-          exit 1
+          result=$(podman run --rm \
+            --pod test-pod \
+            quay.io/hummingbird/dig:latest @127.0.0.1 example.com +short | sort)
+          echo "Result: ${result}"
+          echo "Expected: ${EXPECTED_IP}"
+          [[ "${result}" == "${EXPECTED_IP}" ]] || { echo "FAIL: expected ${EXPECTED_IP}, got ${result}"; exit 1; }
+          echo "PASS"
 
       - name: Admin web UI responds
         run: |

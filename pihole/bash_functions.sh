@@ -29,15 +29,15 @@ setFTLConfigValue() {
 }
 
 start_cron() {
-    echo "  [i] Starting supercronic for scheduled scripts. Randomizing times for gravity and update checker"
+    echo "  [i] Starting busybox crond for scheduled scripts. Randomizing times for gravity and update checker"
     # Randomize gravity update time
     sed -i "s/59 1 /$((1 + RANDOM % 58)) $((3 + RANDOM % 2))/" /crontab.txt
     # Randomize update checker time
     sed -i "s/59 17/$((1 + RANDOM % 58)) $((12 + RANDOM % 8))/" /crontab.txt
 
-    # supercronic reads the crontab file directly; no crontab(1) install step needed
-    # cronie is not in the Hummingbird repo — see Dockerfile for rationale
-    { /usr/bin/supercronic /crontab.txt |& prefix-time.sh; } &
+    mkdir -p /var/spool/cron/crontabs
+    cp /crontab.txt /var/spool/cron/crontabs/root
+    { busybox crond -f -d8 -L /dev/stderr 2>&1 | prefix-time.sh; } &
     echo ""
 }
 

@@ -3,8 +3,10 @@ on:
   pull_request:
     paths:
       - 'unbound/**'
+      - '.github/workflows/test_unbound.yml'
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   test-unbound:
@@ -30,9 +32,17 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           image: unbound-test
-          tags: pr-${{ github.event.pull_request.number }}
+          tags: ${{ github.event.pull_request.number && format('pr-{0}', github.event.pull_request.number) || 'test' }}
           containerfiles: unbound/Containerfile
           context: unbound/
+
+      - name: Establish DNS ground truth
+        run: |
+          expected=$(dig example.com +short | sort)
+          echo "Host resolver says example.com = ${expected}"
+          echo "EXPECTED_IP<<EOF" >> $GITHUB_ENV
+          echo "${expected}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Create pod
         run: podman pod create --name test-unbound-pod
@@ -42,16 +52,17 @@ jobs:
           podman run -d \
             --pod test-unbound-pod \
             --name test-unbound \
-            localhost/unbound-test:pr-${{ github.event.pull_request.number }}
+            localhost/unbound-test:${{ github.event.pull_request.number && format('pr-{0}', github.event.pull_request.number) || 'test' }}
           sleep 3
 
       - name: DNS resolution over pod localhost
         run: |
           result=$(podman run --rm \
             --pod test-unbound-pod \
-            quay.io/hummingbird/dig:latest @127.0.0.1 -p 5335 example.com +short)
+            quay.io/hummingbird/dig:latest @127.0.0.1 -p 5335 example.com +short | sort)
           echo "Result: ${result}"
-          [[ -n "${result}" ]] || { echo "FAIL: no response from unbound at 127.0.0.1:5335"; exit 1; }
+          echo "Expected: ${EXPECTED_IP}"
+          [[ "${result}" == "${EXPECTED_IP}" ]] || { echo "FAIL: expected ${EXPECTED_IP}, got ${result}"; exit 1; }
           echo "PASS"
 
       - name: Cleanup pod
