@@ -14,7 +14,7 @@
   "customManagers": [
     {
       "customType": "regex",
-      "description": "Track ARG-pinned versions (FTL, pihole-core, pihole-web, supercronic)",
+      "description": "Track ARG-pinned versions (FTL, pihole-core, pihole-web)",
       "managerFilePatterns": [
         "/^pihole/Containerfile$/"
       ],
