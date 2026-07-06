@@ -47,7 +47,7 @@ RUN curl -sSL \
     && readelf -h /usr/bin/pihole-FTL || (echo "Error with FTL binary" && exit 1)
 
 # Stage 2: runtime image
-FROM registry.access.redhat.com/hi/core-runtime@sha256:9c7c8552fee26f6ae292e5f959a1987ab141f6bad69be0e3063686c86dbaf1a4
+FROM registry.access.redhat.com/hi/core-runtime@sha256:b93bfca801245219c332093e1c52a639414154533cecb1522630aeef48710960
 
 USER root
 
