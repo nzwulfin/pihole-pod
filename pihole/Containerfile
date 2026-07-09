@@ -6,11 +6,11 @@ FROM registry.access.redhat.com/hi/core-runtime:latest-builder AS builder
 USER root
 
 # renovate: datasource=github-releases depName=pi-hole/FTL
-ARG FTL_VERSION=v6.6.2
+ARG FTL_VERSION=v6.7
 # renovate: datasource=github-releases depName=pi-hole/pi-hole
 ARG PIHOLE_CORE_VERSION=v6.4.3
 # renovate: datasource=github-releases depName=pi-hole/web
-ARG PIHOLE_WEB_VERSION=v6.5.1
+ARG PIHOLE_WEB_VERSION=v6.6
 
 RUN dnf install -y \
     --setopt=install_weak_deps=False \
