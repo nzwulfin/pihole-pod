@@ -9,6 +9,11 @@
       "matchDatasources": ["docker"],
       "matchPackageNames": ["registry.access.redhat.com/hi/**"],
       "versioning": "redhat"
+    },
+    {                                                                                                               
+      "matchManagers": ["custom.regex"],                                                                                
+      "matchFileNames": ["pihole/Containerfile"],                                                                   
+      "groupName": "pihole dependencies"
     }
   ],
   "customManagers": [
