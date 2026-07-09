@@ -64,6 +64,7 @@ RUN --mount=type=bind,from=registry.access.redhat.com/hi/core-runtime:latest-bui
     --setopt=tsflags=nodocs \
     bind-utils \
     busybox \
+    curl \
     iproute \
     logrotate \
     procps-ng \
