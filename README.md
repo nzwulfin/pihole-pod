@@ -29,6 +29,7 @@ This image carries the following deviations from [pi-hole/docker-pi-hole](https:
 | `bash_functions.sh` | `start_cron()` rewritten for busybox crond (replaces Alpine crond). `fix_capabilities()` uses hardcoded `/usr/bin/pihole-FTL` path instead of `$(which pihole-FTL)` (`which` is not in the runtime image). |
 | `start.sh` | `pihole updatechecker` replaced with a static file copy from build-time `/etc/pihole.versions.build`. Calls to `set_uid_gid` and `install_additional_packages` removed. `install_logrotate` call added. |
 | `pihole-FTL-prestart.sh` | Forked from upstream. Added `chown root:root /etc/pihole/logrotate` to fix ownership after the `install_logrotate` startup function recreates the file. |
+| `gravity.sh` | `sudo -u pihole test` replaced with `test` for `file://` adlist readability check (`sudo` not in runtime image; no privilege separation in container). |
 | `crontab.txt` | `pihole updatechecker` cron entry removed (versions are frozen at build time). |
 
 ### Removed features

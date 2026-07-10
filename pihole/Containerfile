@@ -44,7 +44,8 @@ RUN cd /etc/.pihole && \
     install -Dm755 -t /usr/local/bin pihole && \
     install -Dm644 ./advanced/bash-completion/pihole.bash /etc/bash_completion.d/pihole && \
     install -Dm644 ./advanced/bash-completion/pihole-ftl.bash /etc/bash_completion.d/pihole-FTL && \
-    install -T -m 0755 ./advanced/Templates/pihole-FTL-poststop.sh /opt/pihole/pihole-FTL-poststop.sh
+    install -T -m 0755 ./advanced/Templates/pihole-FTL-poststop.sh /opt/pihole/pihole-FTL-poststop.sh && \
+    sed -i 's/sudo -u pihole test/test/' /opt/pihole/gravity.sh
 
 ADD https://ftl.pi-hole.net/macvendor.db /macvendor.db
 
