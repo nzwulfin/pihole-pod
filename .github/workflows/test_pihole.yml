@@ -82,6 +82,20 @@ jobs:
           [[ "${result}" =~ ^(200|302)$ ]] || { echo "FAIL: admin UI returned ${result}"; exit 1; }
           echo "PASS"
 
+      - name: Seed test blocklist and run gravity
+        run: |
+          podman exec test-pihole sh -c 'printf "%s\n" "blocked.test.pihole" > /tmp/test-blocklist.txt'
+          podman exec test-pihole pihole-FTL sqlite3 /etc/pihole/gravity.db \
+            "INSERT INTO adlist (address, enabled, type) VALUES ('file:///tmp/test-blocklist.txt', 1, 0);"
+          podman exec test-pihole pihole -g
+
+      - name: Blocklist blocks expected domain
+        run: |
+          result=$(dig @127.0.0.1 -p 8053 blocked.test.pihole +short)
+          echo "Result: ${result}"
+          [[ "${result}" == "0.0.0.0" ]] || { echo "FAIL: expected 0.0.0.0 (blocked), got '${result}'"; exit 1; }
+          echo "PASS"
+
       - name: Cleanup
         if: always()
         run: podman rm -f test-pihole 2>/dev/null || true
