@@ -29,12 +29,9 @@ setFTLConfigValue() {
 }
 
 start_cron() {
-    echo "  [i] Starting busybox crond for scheduled scripts. Randomizing times for gravity and update checker"
+    echo "  [i] Starting busybox crond for scheduled scripts. Randomizing times for gravity"
     # Randomize gravity update time
     sed -i "s/59 1 /$((1 + RANDOM % 58)) $((3 + RANDOM % 2))/" /crontab.txt
-    # Randomize update checker time
-    sed -i "s/59 17/$((1 + RANDOM % 58)) $((12 + RANDOM % 8))/" /crontab.txt
-
     mkdir -p /var/spool/cron/crontabs
     cp /crontab.txt /var/spool/cron/crontabs/root
     { busybox crond -f -d8 -L /dev/stderr 2>&1 | prefix-time.sh; } &

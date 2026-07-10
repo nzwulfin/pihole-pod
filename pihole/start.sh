@@ -77,7 +77,7 @@ start() {
         exit 1
     fi
 
-    pihole updatechecker
+    cp /etc/pihole.versions.build /etc/pihole/versions
     local versionsOutput
     versionsOutput=$(pihole -v)
     echo "  [i] Version info:"

@@ -82,6 +82,22 @@ jobs:
           [[ "${result}" =~ ^(200|302)$ ]] || { echo "FAIL: admin UI returned ${result}"; exit 1; }
           echo "PASS"
 
+      - name: Gravity database is populated
+        run: |
+          count=$(podman exec test-pihole pihole-FTL sqlite3 /etc/pihole/gravity.db "SELECT COUNT(*) FROM gravity;")
+          echo "Gravity domains: ${count}"
+          [[ ${count} -gt 0 ]] || { echo "FAIL: gravity database is empty"; exit 1; }
+          echo "PASS"
+
+      - name: Blocklist blocks expected domain
+        run: |
+          blocked_domain=$(podman exec test-pihole pihole-FTL sqlite3 /etc/pihole/gravity.db "SELECT domain FROM gravity LIMIT 1;")
+          echo "Testing domain: ${blocked_domain}"
+          result=$(dig @127.0.0.1 -p 8053 "${blocked_domain}" +short)
+          echo "Result: ${result}"
+          [[ "${result}" == "0.0.0.0" ]] || { echo "FAIL: expected 0.0.0.0 (blocked), got '${result}'"; exit 1; }
+          echo "PASS"
+
       - name: Cleanup
         if: always()
         run: podman rm -f test-pihole 2>/dev/null || true
