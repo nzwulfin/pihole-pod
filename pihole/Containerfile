@@ -26,10 +26,10 @@ RUN git clone --branch ${PIHOLE_CORE_VERSION} --single-branch --depth 1 \
     https://github.com/pi-hole/web.git /var/www/html/admin \
     && printf '%s\n' \
       "CORE_VERSION=$(cd /etc/.pihole && git describe --tags --always)" \
-      "CORE_BRANCH=$(cd /etc/.pihole && git rev-parse --abbrev-ref HEAD)" \
+      "CORE_BRANCH=master" \
       "CORE_HASH=$(cd /etc/.pihole && git rev-parse --short=8 HEAD)" \
       "WEB_VERSION=$(cd /var/www/html/admin && git describe --tags --always)" \
-      "WEB_BRANCH=$(cd /var/www/html/admin && git rev-parse --abbrev-ref HEAD)" \
+      "WEB_BRANCH=master" \
       "WEB_HASH=$(cd /var/www/html/admin && git rev-parse --short=8 HEAD)" \
       > /etc/pihole.versions.build \
     && rm -rf /etc/.pihole/.git /var/www/html/admin/.git
