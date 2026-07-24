@@ -57,7 +57,7 @@ jobs:
           context: unbound/
 
       - name: Log in to the destination container registry
-        uses: redhat-actions/podman-login@v1
+        uses: redhat-actions/podman-login@v2
         with:
           registry: ${{ env.DEST_REGISTRY_HOST }}
           username: ${{ env.DEST_REGISTRY_USER }}
