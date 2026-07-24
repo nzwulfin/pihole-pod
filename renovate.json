@@ -13,7 +13,7 @@
     {
       "matchDatasources": ["rpm"],
       "versioning": "rpm",
-      "registryUrls": ["https://packages.redhat.com/api/pulp-content/public-hummingbird/x86_64/"]
+      "registryUrls": ["https://packages.redhat.com/api/pulp-content/public-hummingbird/x86_64/repodata/"]
     },
     {
       "matchFileNames": ["pihole/Containerfile"],
