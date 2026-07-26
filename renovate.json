@@ -10,16 +10,28 @@
       "matchPackageNames": ["registry.access.redhat.com/hi/**"],
       "versioning": "redhat"
     },
-    {                                                                                                               
-      "matchManagers": ["custom.regex"],                                                                                
-      "matchFileNames": ["pihole/Containerfile"],                                                                   
-      "groupName": "pihole dependencies"
+    {
+      "matchDatasources": ["rpm"],
+      "versioning": "rpm",
+      "registryUrls": ["https://packages.redhat.com/api/pulp-content/public-hummingbird/x86_64/repodata/"]
+    },
+    {
+      "matchFileNames": ["pihole/Containerfile"],
+      "groupName": "pihole image"
+    },
+    {
+      "matchFileNames": ["unbound/Containerfile"],
+      "groupName": "unbound image"
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "groupName": "github actions"
     }
   ],
   "customManagers": [
     {
       "customType": "regex",
-      "description": "Track ARG-pinned versions (FTL, pihole-core, pihole-web)",
+      "description": "Track ARG-pinned versions (github-releases and rpm)",
       "managerFilePatterns": [
         "/^pihole/Containerfile$/"
       ],

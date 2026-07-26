@@ -71,6 +71,25 @@ USER root
 ENV DNSMASQ_USER=pihole
 ENV FTL_CMD=no-daemon
 
+# renovate: datasource=rpm depName=bind-utils
+ARG BIND_UTILS_VERSION=9.18.50-22.hum1
+# renovate: datasource=rpm depName=busybox
+ARG BUSYBOX_VERSION=1.37.0-8.2.hum1
+# renovate: datasource=rpm depName=curl
+ARG CURL_VERSION=8.21.0-0.1.1.hum1
+# renovate: datasource=rpm depName=gawk
+ARG GAWK_VERSION=5.4.0-4.hum1
+# renovate: datasource=rpm depName=iproute
+ARG IPROUTE_VERSION=7.0.0-2.hum1
+# renovate: datasource=rpm depName=logrotate
+ARG LOGROTATE_VERSION=3.22.0-6.hum1
+# renovate: datasource=rpm depName=procps-ng
+ARG PROCPS_NG_VERSION=4.0.6-2.hum1
+# renovate: datasource=rpm depName=psmisc
+ARG PSMISC_VERSION=23.7-9.hum1
+# renovate: datasource=rpm depName=tzdata
+ARG TZDATA_VERSION=2026b-2.hum1
+
 RUN --mount=type=bind,from=registry.access.redhat.com/hi/core-runtime:latest-builder,target=/builder \
     LD_LIBRARY_PATH=/builder/lib64:/builder/usr/lib64 \
     RPM_CONFIGDIR=/builder/usr/lib/rpm \
@@ -79,15 +98,15 @@ RUN --mount=type=bind,from=registry.access.redhat.com/hi/core-runtime:latest-bui
     --setopt=reposdir=/builder/etc/yum.repos.d \
     --setopt=install_weak_deps=False \
     --setopt=tsflags=nodocs \
-    bind-utils \
-    busybox \
-    curl \
-    gawk \
-    iproute \
-    logrotate \
-    procps-ng \
-    psmisc \
-    tzdata
+    bind-utils-${BIND_UTILS_VERSION} \
+    busybox-${BUSYBOX_VERSION} \
+    curl-${CURL_VERSION} \
+    gawk-${GAWK_VERSION} \
+    iproute-${IPROUTE_VERSION} \
+    logrotate-${LOGROTATE_VERSION} \
+    procps-ng-${PROCPS_NG_VERSION} \
+    psmisc-${PSMISC_VERSION} \
+    tzdata-${TZDATA_VERSION}
 
 RUN echo "pihole:x:1000:1000:Pi-hole:/:/sbin/nologin" >> /etc/passwd \
     && echo "pihole:x:1000:" >> /etc/group
