@@ -64,7 +64,7 @@ RUN curl -sSL \
       >> /etc/pihole.versions.build
 
 # Stage 2: runtime image
-FROM registry.access.redhat.com/hi/core-runtime@sha256:a9acec2a2ff60f41fdcb2047accd1b5dc2cee5599ed2f77ea2e0f01d9de1c258
+FROM registry.access.redhat.com/hi/core-runtime@sha256:80bd4bd4e74c8ab4e372cf355b335dbd30d91e9e5669822283299e65c64788e2
 
 USER root
 
