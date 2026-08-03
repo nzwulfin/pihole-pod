@@ -1,6 +1,6 @@
 # pihole-pod
 
-Pi-hole DNS sinkhole running on Red Hat UBI (core-runtime) as a Podman quadlet with an Unbound recursive resolver sidecar.
+Pi-hole DNS sinkhole running on RHHI (core-runtime) as a Podman quadlet with an Unbound recursive resolver sidecar.
 
 Upstream components pinned by release tag in the Containerfile:
 
