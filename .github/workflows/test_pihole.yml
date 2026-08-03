@@ -35,6 +35,9 @@ jobs:
           tags: ${{ github.event.pull_request.number && format('pr-{0}', github.event.pull_request.number) || 'test' }}
           containerfiles: pihole/Containerfile
           context: pihole/
+          # Ubuntu's buildah uses the legacy imagebuilder parser which doesn't support
+          # heredoc RUN syntax. Run upstream buildah in a container instead.
+          buildah-image: quay.io/buildah/stable
 
       - name: Establish DNS ground truth
         run: |

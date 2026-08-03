@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 # Stage 1: build-time preparation
 # Clone upstream repos, download binaries, extract scripts, strip .git dirs
 FROM registry.access.redhat.com/hi/core-runtime:latest-builder AS builder
@@ -20,48 +18,57 @@ RUN dnf install -y \
     git \
     && dnf clean all
 
-RUN git clone --branch ${PIHOLE_CORE_VERSION} --single-branch --depth 1 \
-    https://github.com/pi-hole/pi-hole.git /etc/.pihole \
-    && git clone --branch ${PIHOLE_WEB_VERSION} --single-branch --depth 1 \
-    https://github.com/pi-hole/web.git /var/www/html/admin \
-    && printf '%s\n' \
-      "CORE_VERSION=$(cd /etc/.pihole && git describe --tags --always)" \
-      "CORE_BRANCH=master" \
-      "CORE_HASH=$(cd /etc/.pihole && git rev-parse --short=8 HEAD)" \
-      "WEB_VERSION=$(cd /var/www/html/admin && git describe --tags --always)" \
-      "WEB_BRANCH=master" \
-      "WEB_HASH=$(cd /var/www/html/admin && git rev-parse --short=8 HEAD)" \
-      > /etc/pihole.versions.build \
-    && rm -rf /etc/.pihole/.git /var/www/html/admin/.git
+RUN <<EOF
+set -ex
+git clone --branch ${PIHOLE_CORE_VERSION} --single-branch --depth 1 \
+    https://github.com/pi-hole/pi-hole.git /etc/.pihole
+git clone --branch ${PIHOLE_WEB_VERSION} --single-branch --depth 1 \
+    https://github.com/pi-hole/web.git /var/www/html/admin
+printf '%s\n' \
+  "CORE_VERSION=$(cd /etc/.pihole && git describe --tags --always)" \
+  "CORE_BRANCH=master" \
+  "CORE_HASH=$(cd /etc/.pihole && git rev-parse --short=8 HEAD)" \
+  "WEB_VERSION=$(cd /var/www/html/admin && git describe --tags --always)" \
+  "WEB_BRANCH=master" \
+  "WEB_HASH=$(cd /var/www/html/admin && git rev-parse --short=8 HEAD)" \
+  > /etc/pihole.versions.build
+rm -rf /etc/.pihole/.git /var/www/html/admin/.git
+EOF
 
-RUN cd /etc/.pihole && \
-    install -Dm755 -d /opt/pihole && \
-    install -Dm755 -t /opt/pihole gravity.sh && \
-    install -Dm755 -t /opt/pihole ./advanced/Scripts/*.sh && \
-    install -Dm755 -t /opt/pihole ./advanced/Scripts/COL_TABLE && \
-    install -Dm755 -d /etc/pihole && \
-    install -Dm644 -t /etc/pihole ./advanced/Templates/logrotate && \
-    install -Dm755 -t /usr/local/bin pihole && \
-    install -Dm644 ./advanced/bash-completion/pihole.bash /etc/bash_completion.d/pihole && \
-    install -Dm644 ./advanced/bash-completion/pihole-ftl.bash /etc/bash_completion.d/pihole-FTL && \
-    install -T -m 0755 ./advanced/Templates/pihole-FTL-poststop.sh /opt/pihole/pihole-FTL-poststop.sh && \
-    sed -i 's/sudo -u pihole test/test/' /opt/pihole/gravity.sh
+RUN <<EOF
+set -ex
+cd /etc/.pihole
+install -Dm755 -d /opt/pihole
+install -Dm755 -t /opt/pihole gravity.sh
+install -Dm755 -t /opt/pihole ./advanced/Scripts/*.sh
+install -Dm755 -t /opt/pihole ./advanced/Scripts/COL_TABLE
+install -Dm755 -d /etc/pihole
+install -Dm644 -t /etc/pihole ./advanced/Templates/logrotate
+install -Dm755 -t /usr/local/bin pihole
+install -Dm644 ./advanced/bash-completion/pihole.bash /etc/bash_completion.d/pihole
+install -Dm644 ./advanced/bash-completion/pihole-ftl.bash /etc/bash_completion.d/pihole-FTL
+install -T -m 0755 ./advanced/Templates/pihole-FTL-poststop.sh /opt/pihole/pihole-FTL-poststop.sh
+sed -i 's/sudo -u pihole test/test/' /opt/pihole/gravity.sh
+EOF
 
 ADD https://ftl.pi-hole.net/macvendor.db /macvendor.db
 
-RUN curl -sSL \
+RUN <<EOF
+set -ex
+curl -sSL \
     "https://github.com/pi-hole/ftl/releases/download/${FTL_VERSION}/pihole-FTL-amd64" \
-    -o /usr/bin/pihole-FTL \
-    && chmod +x /usr/bin/pihole-FTL \
-    && readelf -h /usr/bin/pihole-FTL || (echo "Error with FTL binary" && exit 1) \
-    && { FTL_VER=$(/usr/bin/pihole-FTL version 2>/dev/null) || FTL_VER="${FTL_VERSION#v}"; } \
-    && { FTL_BR=$(/usr/bin/pihole-FTL branch 2>/dev/null) || FTL_BR="release"; } \
-    && { FTL_HSH=$(/usr/bin/pihole-FTL --hash 2>/dev/null) || FTL_HSH="N/A"; } \
-    && printf '%s\n' \
-      "FTL_VERSION=${FTL_VER}" \
-      "FTL_BRANCH=${FTL_BR}" \
-      "FTL_HASH=${FTL_HSH}" \
-      >> /etc/pihole.versions.build
+    -o /usr/bin/pihole-FTL
+chmod +x /usr/bin/pihole-FTL
+readelf -h /usr/bin/pihole-FTL || (echo "Error with FTL binary" && exit 1)
+FTL_VER=$(/usr/bin/pihole-FTL version 2>/dev/null) || FTL_VER="${FTL_VERSION#v}"
+FTL_BR=$(/usr/bin/pihole-FTL branch 2>/dev/null) || FTL_BR="release"
+FTL_HSH=$(/usr/bin/pihole-FTL --hash 2>/dev/null) || FTL_HSH="N/A"
+printf '%s\n' \
+  "FTL_VERSION=${FTL_VER}" \
+  "FTL_BRANCH=${FTL_BR}" \
+  "FTL_HASH=${FTL_HSH}" \
+  >> /etc/pihole.versions.build
+EOF
 
 # Stage 2: runtime image
 FROM registry.access.redhat.com/hi/core-runtime@sha256:80bd4bd4e74c8ab4e372cf355b335dbd30d91e9e5669822283299e65c64788e2
@@ -105,10 +112,12 @@ RUN echo "pihole:x:1000:1000:Pi-hole:/:/sbin/nologin" >> /etc/passwd \
 # Busybox provides find, sed, and awk but the RPM does not create symlinks.
 # Create them here so upstream pi-hole scripts (gravity.sh etc.) can call these
 # tools by name without modification.
-RUN ln -sf /usr/bin/busybox /usr/bin/find \
-    && ln -sf /usr/bin/busybox /usr/bin/sed \
-    && ln -sf /usr/bin/busybox /usr/bin/awk \
-    && ln -sf /usr/bin/busybox /usr/bin/uptime
+RUN <<EOF
+ln -sf /usr/bin/busybox /usr/bin/find
+ln -sf /usr/bin/busybox /usr/bin/sed
+ln -sf /usr/bin/busybox /usr/bin/awk
+ln -sf /usr/bin/busybox /usr/bin/uptime
+EOF
 
 COPY --from=builder /usr/bin/pihole-FTL /usr/bin/pihole-FTL
 COPY --from=builder /macvendor.db /macvendor.db
