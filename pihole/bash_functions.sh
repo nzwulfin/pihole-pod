@@ -187,7 +187,7 @@ fix_capabilities() {
             echo "        * ${i}"
         done
 
-        setcap "${CAP_STR:1}"+ep /usr/bin/pihole-FTL || ret=$?
+        setcap "${CAP_STR:1}"+ep "$(busybox which pihole-FTL)" || ret=$?
 
         if [[ $DHCP_READY == false ]] && [[ $FTLCONF_dhcp_active == true ]]; then
             # DHCP is requested but NET_ADMIN is not available.

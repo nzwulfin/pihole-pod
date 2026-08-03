@@ -1,6 +1,6 @@
 # pihole-pod
 
-Pi-hole DNS sinkhole running on RHHI (core-runtime) as a Podman quadlet with an Unbound recursive resolver sidecar.
+Pi-hole DNS sinkhole running on RHHI `core-runtime` with an RHHI `unbound` recursive resolver sidecar as a Podman quadlet.
 
 Upstream components pinned by release tag in the Containerfile:
 
@@ -20,28 +20,35 @@ sudo systemctl start pihole
 
 ## Changes from upstream pi-hole
 
-This image carries the following deviations from [pi-hole/docker-pi-hole](https://github.com/pi-hole/docker-pi-hole). Upstream scripts are otherwise unmodified.
+This image carries the following changes from [pi-hole/docker-pi-hole](https://github.com/pi-hole/docker-pi-hole) to support the migration from Alpine to  the `core-runtime` base.
+Minimal changes to the upstream components are made to support the new runtime environment.
+Some [additional packages are installed](https://github.com/nzwulfin/pihole-pod/blob/7aea76c602d1849a6c64c823394058ff43cb7f04/pihole/Containerfile#L87) in the final stage and some [convenience symlinks created](https://github.com/nzwulfin/pihole-pod/blob/7aea76c602d1849a6c64c823394058ff43cb7f04/pihole/Containerfile#L108).
 
-### Modified scripts
+### Build-time versioning instead of runtime checks
 
 | Script | Change |
 |--------|--------|
-| `bash_functions.sh` | `start_cron()` rewritten for busybox crond (replaces Alpine crond). `fix_capabilities()` uses hardcoded `/usr/bin/pihole-FTL` path instead of `$(which pihole-FTL)` (`which` is not in the runtime image). |
-| `start.sh` | `pihole updatechecker` replaced with a static file copy from build-time `/etc/pihole.versions.build`. Calls to `set_uid_gid` and `install_additional_packages` removed. `install_logrotate` call added. |
-| `pihole-FTL-prestart.sh` | Forked from upstream. Added `chown root:root /etc/pihole/logrotate` to fix ownership after the `install_logrotate` startup function recreates the file. |
-| `gravity.sh` | `sudo -u pihole test` replaced with `test` for `file://` adlist readability check (`sudo` not in runtime image; no privilege separation in container). |
-| `crontab.txt` | `pihole updatechecker` cron entry removed (versions are frozen at build time). |
+| `/etc/pihole.versions.build` | Added — captures CORE/WEB/FTL versions at build |
+| `start.sh` | `pihole updatechecker` replaced with static copy from build-time `/etc/pihole.versions.build` |
+| `crontab.txt` | `pihole updatechecker` entry removed |
 
-### Removed features
+### Fix log rotation 
 
-| Feature | Upstream mechanism | Why removed |
-|---------|-------------------|-------------|
-| Update checker | `pihole updatechecker` at startup and daily cron | No git at runtime; versions captured at build time from upstream repos and the FTL binary |
-| PADD dashboard | Downloaded at build time | Not included |
+| Script | Change |
+|--------|--------|
+| `bash_functions.sh` | `install_logrotate()` added — re-installs logrotate config on startup to survive `/etc/pihole` volume mounts |
+| `pihole-FTL-prestart.sh`** | `chown root:root /etc/pihole/logrotate` added to fix ownership after startup reinstall |
 
-### Added
+### Changes to support `core-runtime` environment
 
-| Addition | Purpose |
-|----------|---------|
-| `install_logrotate()` in `bash_functions.sh` | Re-installs logrotate config from `/etc/.pihole` on startup to survive `/etc/pihole` volume mounts |
-| Build-time version file | `/etc/pihole.versions.build` generated in builder stage (CORE/WEB from git, FTL from binary) and copied to `/etc/pihole/versions` at startup |
+| Script | Change |
+|--------|--------|
+| `bash_functions.sh` | `start_cron()` rewritten for busybox crond |
+| `bash_functions.sh` | `fix_capabilities()` uses `busybox which` to locate `pihole-FTL` |
+| `bash_functions.sh` | `sed` → `busybox sed` |
+| `start.sh` | `set_uid_gid` and `install_additional_packages` removed; `sed` → `busybox sed`; `killall` → `busybox killall` |
+| `gravity.sh`** | `sudo -u pihole test` → `test` (no privilege separation in container) |
+| `pihole-FTL-prestart.sh`** | Numeric UID/GID references replaced with named `pihole` user; `find` → `busybox find` |
+** upstream component
+
+[PADD](https://github.com/pi-hole/PADD) not used, dropped from upstream Containerfile
