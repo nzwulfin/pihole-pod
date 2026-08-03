@@ -28,13 +28,11 @@ jobs:
           echo $auth > $HOME/.docker/config.json
 
       - name: Build pi-hole image
-        id: build-image
-        uses: redhat-actions/buildah-build@v3
-        with:
-          image: pihole-test
-          tags: ${{ github.event.pull_request.number && format('pr-{0}', github.event.pull_request.number) || 'test' }}
-          containerfiles: pihole/Containerfile
-          context: pihole/
+        run: |
+          buildah build \
+            -t pihole-test:${{ github.event.pull_request.number && format('pr-{0}', github.event.pull_request.number) || 'test' }} \
+            -f pihole/Containerfile \
+            pihole/
 
       - name: Establish DNS ground truth
         run: |
