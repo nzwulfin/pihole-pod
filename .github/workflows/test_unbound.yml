@@ -53,7 +53,19 @@ jobs:
             --pod test-unbound-pod \
             --name test-unbound \
             localhost/unbound-test:${{ github.event.pull_request.number && format('pr-{0}', github.event.pull_request.number) || 'test' }}
-          sleep 3
+
+      - name: Wait for DNS to be ready
+        run: |
+          podman pull quay.io/hummingbird/dig:latest
+          for i in $(seq 1 30); do
+            result=$(podman run --rm \
+              --pod test-unbound-pod \
+              quay.io/hummingbird/dig:latest @127.0.0.1 -p 5335 example.com +short 2>/dev/null)
+            [ -n "${result}" ] && break
+            echo "Attempt ${i}: DNS not ready yet, waiting..."
+            sleep 3
+          done
+          echo "Readiness probe result: ${result}"
 
       - name: DNS resolution over pod localhost
         run: |
