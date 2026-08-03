@@ -55,6 +55,9 @@ jobs:
           tags: ${{ env.TAGLIST }}
           containerfiles: ${{ env.CONTAINERFILE }}
           context: pihole/
+          # Ubuntu's buildah uses the legacy imagebuilder parser which doesn't support
+          # heredoc RUN syntax. Run upstream buildah in a container instead.
+          buildah-image: quay.io/buildah/stable
 
       - name: Log in to the destination container registry
         uses: redhat-actions/podman-login@v2
