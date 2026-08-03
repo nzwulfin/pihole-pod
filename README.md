@@ -22,7 +22,7 @@ sudo systemctl start pihole
 
 This image carries the following changes from [pi-hole/docker-pi-hole](https://github.com/pi-hole/docker-pi-hole) to support the migration from Alpine to  the `core-runtime` base.
 Minimal changes to the upstream components are made to support the new runtime environment.
-Some [additional packages are installed](https://github.com/nzwulfin/pihole-pod/blob/7aea76c602d1849a6c64c823394058ff43cb7f04/pihole/Containerfile#L87) in the final stage and some [convenience symlinks created](https://github.com/nzwulfin/pihole-pod/blob/7aea76c602d1849a6c64c823394058ff43cb7f04/pihole/Containerfile#L108).
+Some [additional packages are installed](https://github.com/nzwulfin/pihole-pod/blob/main/pihole/Containerfile#L92) in the final stage and some [convenience symlinks created](https://github.com/nzwulfin/pihole-pod/blob/main/pihole/Containerfile#L112).
 
 ### Build-time versioning instead of runtime checks
 
@@ -49,6 +49,7 @@ Some [additional packages are installed](https://github.com/nzwulfin/pihole-pod/
 | `start.sh` | `set_uid_gid` and `install_additional_packages` removed; `sed` → `busybox sed`; `killall` → `busybox killall` |
 | `gravity.sh`** | `sudo -u pihole test` → `test` (no privilege separation in container) |
 | `pihole-FTL-prestart.sh`** | Numeric UID/GID references replaced with named `pihole` user; `find` → `busybox find` |
+
 ** upstream component
 
 [PADD](https://github.com/pi-hole/PADD) not used, dropped from upstream Containerfile
