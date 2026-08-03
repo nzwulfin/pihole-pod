@@ -78,8 +78,6 @@ USER root
 ENV DNSMASQ_USER=pihole
 ENV FTL_CMD=no-daemon
 
-# renovate: datasource=rpm depName=bind-utils
-ARG BIND_UTILS_VERSION=9.18.50-22.hum1
 # renovate: datasource=rpm depName=busybox
 ARG BUSYBOX_VERSION=1.37.0-8.2.hum1
 # renovate: datasource=rpm depName=curl
@@ -99,7 +97,6 @@ RUN --mount=type=bind,from=registry.access.redhat.com/hi/core-runtime:latest-bui
     --setopt=reposdir=/builder/etc/yum.repos.d \
     --setopt=install_weak_deps=False \
     --setopt=tsflags=nodocs \
-    bind-utils-${BIND_UTILS_VERSION} \
     busybox-${BUSYBOX_VERSION} \
     curl-${CURL_VERSION} \
     iproute-${IPROUTE_VERSION} \
@@ -141,6 +138,6 @@ COPY crontab.txt /crontab.txt
 EXPOSE 53 53/udp
 EXPOSE 80
 
-HEALTHCHECK CMD dig -p $(pihole-FTL --config dns.port) +short +norecurse +retry=0 @127.0.0.1 pi.hole || exit 1
+HEALTHCHECK CMD busybox nslookup -port=$(pihole-FTL --config dns.port) pi.hole 127.0.0.1 || exit 1
 
 ENTRYPOINT ["start.sh"]
