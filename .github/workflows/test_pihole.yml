@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Get container tools
-        run: sudo apt-get -y install podman buildah
+        run: sudo apt-get -y install podman
 
       - name: Workaround open podman-login action issue
         env:
