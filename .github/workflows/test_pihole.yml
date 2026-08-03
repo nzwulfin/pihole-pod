@@ -35,7 +35,6 @@ jobs:
           tags: ${{ github.event.pull_request.number && format('pr-{0}', github.event.pull_request.number) || 'test' }}
           containerfiles: pihole/Containerfile
           context: pihole/
-          squash: false
 
       - name: Establish DNS ground truth
         run: |
