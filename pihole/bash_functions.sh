@@ -31,7 +31,7 @@ setFTLConfigValue() {
 start_cron() {
     echo "  [i] Starting busybox crond for scheduled scripts. Randomizing times for gravity"
     # Randomize gravity update time
-    sed -i "s/59 1 /$((1 + RANDOM % 58)) $((3 + RANDOM % 2))/" /crontab.txt
+    busybox sed -i "s/59 1 /$((1 + RANDOM % 58)) $((3 + RANDOM % 2))/" /crontab.txt
     mkdir -p /var/spool/cron/crontabs
     cp /crontab.txt /var/spool/cron/crontabs/root
     { busybox crond -f -d8 -L /dev/stderr 2>&1 | prefix-time.sh; } &
@@ -66,7 +66,7 @@ migrate_gravity() {
         source /etc/.pihole/advanced/Scripts/database_migration/gravity-db.sh
         local upgradeOutput
         upgradeOutput=$(upgrade_gravityDB "${gravityDBfile}" "/etc/pihole")
-        printf "%b" "${upgradeOutput}\\n" | sed 's/^/     /'
+        printf "%b" "${upgradeOutput}\\n" | busybox sed 's/^/     /'
     fi
     echo ""
 }
@@ -126,7 +126,7 @@ migrate_v5_configs() {
     # Print the output of the FTL migration prefacing every line with six
     # spaces for alignment with other container output. Replace the first line to match the style of the other messages
     # We suppress the message about environment variables as these will be set on FTL's first real start
-    printf "%b" "${FTLoutput}\\n" | sed 's/^/      /' | sed 's/      Migrating config to Pi-hole v6.0 format/  [i] Migrating config to Pi-hole v6.0 format/' | sed 's/- 0 entries are forced through environment//'
+    printf "%b" "${FTLoutput}\\n" | busybox sed 's/^/      /' | busybox sed 's/      Migrating config to Pi-hole v6.0 format/  [i] Migrating config to Pi-hole v6.0 format/' | busybox sed 's/- 0 entries are forced through environment//'
 
     # Print a blank line for separation
     echo ""
