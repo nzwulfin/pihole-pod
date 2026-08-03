@@ -77,16 +77,10 @@ ARG BIND_UTILS_VERSION=9.18.50-22.hum1
 ARG BUSYBOX_VERSION=1.37.0-8.2.hum1
 # renovate: datasource=rpm depName=curl
 ARG CURL_VERSION=8.21.0-0.1.1.hum1
-# renovate: datasource=rpm depName=gawk
-ARG GAWK_VERSION=5.4.0-4.hum1
 # renovate: datasource=rpm depName=iproute
 ARG IPROUTE_VERSION=7.0.0-2.hum1
 # renovate: datasource=rpm depName=logrotate
 ARG LOGROTATE_VERSION=3.22.0-6.hum1
-# renovate: datasource=rpm depName=procps-ng
-ARG PROCPS_NG_VERSION=4.0.6-2.hum1
-# renovate: datasource=rpm depName=psmisc
-ARG PSMISC_VERSION=23.7-9.hum1
 # renovate: datasource=rpm depName=tzdata
 ARG TZDATA_VERSION=2026b-2.hum1
 
@@ -101,15 +95,20 @@ RUN --mount=type=bind,from=registry.access.redhat.com/hi/core-runtime:latest-bui
     bind-utils-${BIND_UTILS_VERSION} \
     busybox-${BUSYBOX_VERSION} \
     curl-${CURL_VERSION} \
-    gawk-${GAWK_VERSION} \
     iproute-${IPROUTE_VERSION} \
     logrotate-${LOGROTATE_VERSION} \
-    procps-ng-${PROCPS_NG_VERSION} \
-    psmisc-${PSMISC_VERSION} \
     tzdata-${TZDATA_VERSION}
 
 RUN echo "pihole:x:1000:1000:Pi-hole:/:/sbin/nologin" >> /etc/passwd \
     && echo "pihole:x:1000:" >> /etc/group
+
+# Busybox provides find, sed, and awk but the RPM does not create symlinks.
+# Create them here so upstream pi-hole scripts (gravity.sh etc.) can call these
+# tools by name without modification.
+RUN ln -sf /usr/bin/busybox /usr/bin/find \
+    && ln -sf /usr/bin/busybox /usr/bin/sed \
+    && ln -sf /usr/bin/busybox /usr/bin/awk \
+    && ln -sf /usr/bin/busybox /usr/bin/uptime
 
 COPY --from=builder /usr/bin/pihole-FTL /usr/bin/pihole-FTL
 COPY --from=builder /macvendor.db /macvendor.db
