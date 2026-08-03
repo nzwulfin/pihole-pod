@@ -59,8 +59,12 @@ jobs:
 
       - name: Wait for DNS to be ready
         run: |
+          podman pull quay.io/hummingbird/dig:latest
+          podman pull quay.io/hummingbird/curl:latest
           for i in $(seq 1 30); do
-            result=$(dig @127.0.0.1 -p 8053 example.com +short 2>&1) && break
+            result=$(podman run --rm --network host \
+              quay.io/hummingbird/dig:latest @127.0.0.1 -p 8053 example.com +short 2>/dev/null)
+            [ -n "${result}" ] && break
             echo "Attempt ${i}: DNS not ready yet, waiting..."
             sleep 3
           done
@@ -72,7 +76,8 @@ jobs:
 
       - name: DNS resolution through pi-hole
         run: |
-          result=$(dig @127.0.0.1 -p 8053 example.com +short | sort)
+          result=$(podman run --rm --network host \
+            quay.io/hummingbird/dig:latest @127.0.0.1 -p 8053 example.com +short 2>/dev/null | sort)
           echo "Result: ${result}"
           echo "Expected: ${EXPECTED_IP}"
           [[ "${result}" == "${EXPECTED_IP}" ]] || { echo "FAIL: expected ${EXPECTED_IP}, got ${result}"; exit 1; }
@@ -80,7 +85,8 @@ jobs:
 
       - name: Admin web UI responds
         run: |
-          result=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/admin/)
+          result=$(podman run --rm --network host \
+            quay.io/hummingbird/curl:latest -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/admin/)
           echo "HTTP status: ${result}"
           [[ "${result}" =~ ^(200|302)$ ]] || { echo "FAIL: admin UI returned ${result}"; exit 1; }
           echo "PASS"
