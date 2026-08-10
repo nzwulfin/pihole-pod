@@ -71,7 +71,7 @@ printf '%s\n' \
 EOF
 
 # Stage 2: runtime image
-FROM registry.access.redhat.com/hi/core-runtime@sha256:cbcd7826f9203582c016f2dabcfa4af351d41d5287a77cc3f0ab4bf75d66148e
+FROM registry.access.redhat.com/hi/core-runtime@sha256:d885d5c40a938c5f7179538fd415c0b5a057b7823d2bd3593c428764ca920e96
 
 USER root
 
@@ -79,7 +79,7 @@ ENV DNSMASQ_USER=pihole
 ENV FTL_CMD=no-daemon
 
 # renovate: datasource=rpm depName=busybox
-ARG BUSYBOX_VERSION=1.37.0-8.2.hum1
+ARG BUSYBOX_VERSION=1.37.0-9.hum1
 # renovate: datasource=rpm depName=curl
 ARG CURL_VERSION=8.21.0-0.1.1.hum1
 # renovate: datasource=rpm depName=iproute
