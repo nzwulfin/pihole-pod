@@ -89,7 +89,7 @@ ARG IPROUTE_VERSION=7.0.0-2.hum1
 # renovate: datasource=rpm depName=logrotate
 ARG LOGROTATE_VERSION=3.22.0-6.hum1
 # renovate: datasource=rpm depName=tzdata
-ARG TZDATA_VERSION=2026b-2.hum1
+ARG TZDATA_VERSION=2026c-1.hum1
 
 RUN --mount=type=bind,from=registry.access.redhat.com/hi/core-runtime:latest-builder,target=/builder \
     LD_LIBRARY_PATH=/builder/lib64:/builder/usr/lib64 \
