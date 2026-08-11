@@ -80,6 +80,8 @@ ENV FTL_CMD=no-daemon
 
 # renovate: datasource=rpm depName=busybox
 ARG BUSYBOX_VERSION=1.37.0-9.hum1
+# renovate: datasource=rpm depName=bash
+ARG BASH_VERSION=5.3.15-2.hum1
 # renovate: datasource=rpm depName=curl
 ARG CURL_VERSION=8.21.0-0.1.1.hum1
 # renovate: datasource=rpm depName=iproute
@@ -98,6 +100,7 @@ RUN --mount=type=bind,from=registry.access.redhat.com/hi/core-runtime:latest-bui
     --setopt=install_weak_deps=False \
     --setopt=tsflags=nodocs \
     busybox-${BUSYBOX_VERSION} \
+    bash-${BASH_VERSION} \
     curl-${CURL_VERSION} \
     iproute-${IPROUTE_VERSION} \
     logrotate-${LOGROTATE_VERSION} \
