@@ -71,7 +71,7 @@ printf '%s\n' \
 EOF
 
 # Stage 2: runtime image
-FROM registry.access.redhat.com/hi/core-runtime@sha256:d885d5c40a938c5f7179538fd415c0b5a057b7823d2bd3593c428764ca920e96
+FROM registry.access.redhat.com/hi/core-runtime@sha256:ba6d97c401f569b74ff26ac58acd35428f2a49d8e48db4976eaa63a6879a445f
 
 USER root
 
@@ -81,7 +81,7 @@ ENV FTL_CMD=no-daemon
 # renovate: datasource=rpm depName=busybox
 ARG BUSYBOX_VERSION=1.37.0-9.hum1
 # renovate: datasource=rpm depName=bash
-ARG BASH_PKG_VERSION=5.3.15-2.hum1
+ARG BASH_PKG_VERSION=5.3.15-2.1.hum1
 # renovate: datasource=rpm depName=curl
 ARG CURL_VERSION=8.21.0-0.1.1.hum1
 # renovate: datasource=rpm depName=iproute
