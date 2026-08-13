@@ -44,11 +44,9 @@ Some [additional packages are installed](https://github.com/nzwulfin/pihole-pod/
 | Script | Change |
 |--------|--------|
 | `bash_functions.sh` | `start_cron()` rewritten for busybox crond |
-| `bash_functions.sh` | `fix_capabilities()` uses `busybox which` to locate `pihole-FTL` |
-| `bash_functions.sh` | `sed` → `busybox sed` |
-| `start.sh` | `set_uid_gid` and `install_additional_packages` removed; `sed` → `busybox sed`; `killall` → `busybox killall` |
+| `start.sh` | `set_uid_gid` and `install_additional_packages` removed |
 | `gravity.sh`** | `sudo -u pihole test` → `test` (no privilege separation in container) |
-| `pihole-FTL-prestart.sh`** | Numeric UID/GID references replaced with named `pihole` user; `find` → `busybox find` |
+| `pihole-FTL-prestart.sh`** | Numeric UID/GID references replaced with named `pihole` user |
 
 ** upstream component
 

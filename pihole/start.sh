@@ -81,7 +81,7 @@ start() {
     local versionsOutput
     versionsOutput=$(pihole -v)
     echo "  [i] Version info:"
-    printf "%b" "${versionsOutput}\\n" | busybox sed 's/^/      /'
+    printf "%b" "${versionsOutput}\\n" | sed 's/^/      /'
     echo ""
 
     if [ "${TAIL_FTL_LOG:-1}" -eq 1 ]; then
@@ -113,7 +113,7 @@ stop() {
         echo "  [i] Container stop requested..."
         echo "  [i] pihole-FTL is running - Attempting to shut it down cleanly"
         echo ""
-        busybox killall -TERM pihole-FTL
+        killall -TERM pihole-FTL
 
         wait $CAPSH_PID
         FTL_EXIT_CODE=$?
