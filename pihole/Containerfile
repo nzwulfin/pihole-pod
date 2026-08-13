@@ -112,12 +112,7 @@ RUN echo "pihole:x:1000:1000:Pi-hole:/:/sbin/nologin" >> /etc/passwd \
 # Busybox provides find, sed, and awk but the RPM does not create symlinks.
 # Create them here so upstream pi-hole scripts (gravity.sh etc.) can call these
 # tools by name without modification.
-RUN <<EOF
-ln -sf /usr/bin/busybox /usr/bin/find
-ln -sf /usr/bin/busybox /usr/bin/sed
-ln -sf /usr/bin/busybox /usr/bin/awk
-ln -sf /usr/bin/busybox /usr/bin/uptime
-EOF
+RUN /bin/busybox --install -s || exit 1
 
 COPY --from=builder /usr/bin/pihole-FTL /usr/bin/pihole-FTL
 COPY --from=builder /macvendor.db /macvendor.db
