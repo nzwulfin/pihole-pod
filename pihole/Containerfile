@@ -83,7 +83,7 @@ ARG BUSYBOX_VERSION=1.37.0-9.hum1
 # renovate: datasource=rpm depName=bash
 ARG BASH_PKG_VERSION=5.3.15-2.1.hum1
 # renovate: datasource=rpm depName=curl
-ARG CURL_VERSION=8.21.0-0.1.1.hum1
+ARG CURL_VERSION=8.21.0-5.hum1
 # renovate: datasource=rpm depName=iproute
 ARG IPROUTE_VERSION=7.0.0-2.hum1
 # renovate: datasource=rpm depName=logrotate
