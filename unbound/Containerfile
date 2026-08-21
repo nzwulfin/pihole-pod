@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/hi/unbound@sha256:585bc753a9907ffd35fc01a7bcc95d92fd7ea9e1be94c6fa068e0ac83348819a
+FROM registry.access.redhat.com/hi/unbound@sha256:ffa2e0137ce2a1b3dd70d6a8720fb75fbef18acf224a97ba2185761d304708a6
 
 COPY unbound-pihole.conf /etc/unbound/conf.d
 
