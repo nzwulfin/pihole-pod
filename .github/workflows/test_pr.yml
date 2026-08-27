@@ -80,14 +80,15 @@ jobs:
         run: |
           podman pull quay.io/hummingbird/dig:latest
           podman pull quay.io/hummingbird/curl:latest
-          for i in $(seq 1 30); do
+          for i in $(seq 1 60); do
             result=$(podman run --rm --network host \
-              quay.io/hummingbird/dig:latest @127.0.0.1 -p 8053 example.com +short 2>/dev/null)
+              quay.io/hummingbird/dig:latest @127.0.0.1 -p 8053 example.com +short 2>/dev/null) || true
             [ -n "${result}" ] && break
-            echo "Attempt ${i}: DNS not ready yet, waiting..."
+            echo "Attempt ${i}/60: DNS not ready yet, waiting..."
             sleep 3
           done
           echo "Readiness probe result: ${result}"
+          [ -n "${result}" ] || { echo "FAIL: DNS did not come up within 3 minutes"; exit 1; }
 
       - name: Dump pi-hole container logs
         if: always()
@@ -180,15 +181,20 @@ jobs:
       - name: Wait for DNS to be ready
         run: |
           podman pull quay.io/hummingbird/dig:latest
-          for i in $(seq 1 30); do
+          for i in $(seq 1 60); do
             result=$(podman run --rm \
               --pod test-unbound-pod \
-              quay.io/hummingbird/dig:latest @127.0.0.1 -p 5335 example.com +short 2>/dev/null)
+              quay.io/hummingbird/dig:latest @127.0.0.1 -p 5335 example.com +short 2>/dev/null) || true
             [ -n "${result}" ] && break
-            echo "Attempt ${i}: DNS not ready yet, waiting..."
+            echo "Attempt ${i}/60: DNS not ready yet, waiting..."
             sleep 3
           done
           echo "Readiness probe result: ${result}"
+          [ -n "${result}" ] || { echo "FAIL: DNS did not come up within 3 minutes"; exit 1; }
+
+      - name: Dump unbound container logs
+        if: always()
+        run: podman logs test-unbound 2>&1 || true
 
       - name: DNS resolution over pod localhost
         run: |
