@@ -71,7 +71,7 @@ printf '%s\n' \
 EOF
 
 # Stage 2: runtime image
-FROM registry.access.redhat.com/hi/core-runtime@sha256:b9e0bf16ff3afe7f1a45451128a091af54065baaff80aec27ac18de7aca27253
+FROM registry.access.redhat.com/hi/core-runtime@sha256:89c1c9bdc4d746526143c9d23f24c56d05ddc0e9c8e6f919e62601437ef8ed61
 
 USER root
 
