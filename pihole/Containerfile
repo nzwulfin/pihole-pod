@@ -71,7 +71,7 @@ printf '%s\n' \
 EOF
 
 # Stage 2: runtime image
-FROM registry.access.redhat.com/hi/core-runtime@sha256:9671a7668f2a0a041d90174dec5cd15eba7ad34227363630d3fea11efa986a41
+FROM registry.access.redhat.com/hi/core-runtime@sha256:58f9030ce520821c61798d41ca52aa2b10ba5f20c49245f63ecffcfcaa3d464f
 
 USER root
 
@@ -83,13 +83,13 @@ ARG BUSYBOX_VERSION=1.37.0-9.hum1
 # renovate: datasource=rpm depName=bash
 ARG BASH_PKG_VERSION=5.3.15-2.1.hum1
 # renovate: datasource=rpm depName=curl
-ARG CURL_VERSION=8.22.0-0.1.hum1
+ARG CURL_VERSION=8.22.0-1.hum1
 # renovate: datasource=rpm depName=iproute
 ARG IPROUTE_VERSION=7.0.0-2.hum1
 # renovate: datasource=rpm depName=logrotate
 ARG LOGROTATE_VERSION=3.22.0-6.hum1
 # renovate: datasource=rpm depName=tzdata
-ARG TZDATA_VERSION=2026c-1.hum1
+ARG TZDATA_VERSION=2026c-2.hum1
 
 RUN --mount=type=bind,from=registry.access.redhat.com/hi/core-runtime:latest-builder,target=/builder \
     LD_LIBRARY_PATH=/builder/lib64:/builder/usr/lib64 \
