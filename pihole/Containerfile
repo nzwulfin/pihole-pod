@@ -79,13 +79,13 @@ ENV DNSMASQ_USER=pihole
 ENV FTL_CMD=no-daemon
 
 # renovate: datasource=rpm depName=busybox
-ARG BUSYBOX_VERSION=1.37.0-9.1.hum1
+ARG BUSYBOX_VERSION=1.37.0-9.2.hum1
 # renovate: datasource=rpm depName=bash
 ARG BASH_PKG_VERSION=5.3.15-2.1.hum1
 # renovate: datasource=rpm depName=curl
 ARG CURL_VERSION=8.22.0-1.hum1
 # renovate: datasource=rpm depName=iproute
-ARG IPROUTE_VERSION=7.0.0-2.hum1
+ARG IPROUTE_VERSION=7.0.0-3.hum1
 # renovate: datasource=rpm depName=logrotate
 ARG LOGROTATE_VERSION=3.22.0-6.hum1
 # renovate: datasource=rpm depName=tzdata
