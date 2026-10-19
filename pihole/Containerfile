@@ -48,7 +48,6 @@ install -Dm755 -t /usr/local/bin pihole
 install -Dm644 ./advanced/bash-completion/pihole.bash /etc/bash_completion.d/pihole
 install -Dm644 ./advanced/bash-completion/pihole-ftl.bash /etc/bash_completion.d/pihole-FTL
 install -T -m 0755 ./advanced/Templates/pihole-FTL-poststop.sh /opt/pihole/pihole-FTL-poststop.sh
-sed -i 's/sudo -u pihole test/test/' /opt/pihole/gravity.sh
 EOF
 
 ADD https://ftl.pi-hole.net/macvendor.db /macvendor.db
@@ -90,6 +89,8 @@ ARG IPROUTE_VERSION=7.2.0-1.1.hum1
 ARG LOGROTATE_VERSION=3.22.0-6.1.hum1
 # renovate: datasource=rpm depName=tzdata
 ARG TZDATA_VERSION=2026e-1.hum1
+# renovate: datasource=rpm depName=sudo
+ARG SUDO_VERSION=1.9.17-16.p2.3.hum1
 
 RUN --mount=type=bind,from=registry.access.redhat.com/hi/core-runtime:latest-builder,target=/builder \
     LD_LIBRARY_PATH=/builder/lib64:/builder/usr/lib64 \
@@ -104,10 +105,13 @@ RUN --mount=type=bind,from=registry.access.redhat.com/hi/core-runtime:latest-bui
     curl-${CURL_VERSION} \
     iproute-${IPROUTE_VERSION} \
     logrotate-${LOGROTATE_VERSION} \
-    tzdata-${TZDATA_VERSION}
+    tzdata-${TZDATA_VERSION} \
+    sudo-${SUDO_VERSION}
 
 RUN echo "pihole:x:1000:1000:Pi-hole:/:/sbin/nologin" >> /etc/passwd \
     && echo "pihole:x:1000:" >> /etc/group
+
+COPY --chmod=0440 pihole.sudoers /etc/sudoers.d/pihole
 
 # Busybox provides find, sed, and awk but the RPM does not create symlinks.
 # Create them here so upstream pi-hole scripts (gravity.sh etc.) can call these
