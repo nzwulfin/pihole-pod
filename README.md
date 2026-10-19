@@ -45,7 +45,7 @@ Some [additional packages are installed](https://github.com/nzwulfin/pihole-pod/
 |--------|--------|
 | `bash_functions.sh` | `start_cron()` rewritten for busybox crond |
 | `start.sh` | `set_uid_gid` and `install_additional_packages` removed |
-| `gravity.sh`** | `sudo -u pihole test` → `test` (no privilege separation in container) |
+| `Containerfile` | `sudo` added to runtime packages (pinned, renovate-tracked); `pihole.sudoers` drop-in grants `pihole` user right to run commands as itself for gravity privilege separation |
 | `pihole-FTL-prestart.sh`** | Numeric UID/GID references replaced with named `pihole` user |
 
 ** upstream component
