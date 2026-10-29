@@ -127,6 +127,44 @@ jobs:
           [[ "${result}" == "0.0.0.0" ]] || { echo "FAIL: expected 0.0.0.0 (blocked), got '${result}'"; exit 1; }
           echo "PASS"
 
+      # The cron entries in crontab.txt run `pihole updateGravity` (weekly) and
+      # `pihole flush once quiet` (daily). Exercise the exact same commands here so
+      # version bumps that change the gravity path (eg #212: gravity re-exec via
+      # sudo) fail CI instead of only being caught by hand.
+      - name: Scheduled gravity update (cron path)
+        run: |
+          podman exec test-pihole pihole updateGravity || { echo "FAIL: pihole updateGravity failed"; exit 1; }
+          echo "PASS"
+
+      - name: Gravity database still populated after update
+        run: |
+          sleep 3 # give FTL a moment to reload the regenerated gravity.db
+          count=$(podman exec test-pihole pihole-FTL sqlite3 /etc/pihole/gravity.db "SELECT COUNT(*) FROM gravity;")
+          echo "Gravity domains: ${count}"
+          [[ ${count} -gt 0 ]] || { echo "FAIL: gravity database empty after updateGravity"; exit 1; }
+          echo "PASS"
+
+      - name: Blocklist still blocks after update
+        run: |
+          blocked_domain=$(podman exec test-pihole pihole-FTL sqlite3 /etc/pihole/gravity.db "SELECT domain FROM gravity LIMIT 1;")
+          echo "Testing domain: ${blocked_domain}"
+          result=$(dig @127.0.0.1 -p 8053 "${blocked_domain}" +short)
+          echo "Result: ${result}"
+          [[ "${result}" == "0.0.0.0" ]] || { echo "FAIL: expected 0.0.0.0 (blocked), got '${result}'"; exit 1; }
+          echo "PASS"
+
+      - name: Scheduled flush (cron path)
+        run: |
+          podman exec test-pihole pihole flush once quiet || { echo "FAIL: pihole flush failed"; exit 1; }
+          echo "PASS"
+
+      - name: DNS still resolves after flush
+        run: |
+          result=$(dig @127.0.0.1 -p 8053 example.com +short | sort)
+          echo "Result: ${result}"
+          [[ "${result}" == "${EXPECTED_IP}" ]] || { echo "FAIL: expected ${EXPECTED_IP}, got '${result}'"; exit 1; }
+          echo "PASS"
+
       - name: Cleanup
         if: always()
         run: podman rm -f test-pihole 2>/dev/null || true
