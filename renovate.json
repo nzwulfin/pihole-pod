@@ -8,7 +8,10 @@
     {
       "matchDatasources": ["docker"],
       "matchPackageNames": ["registry.access.redhat.com/hi/**"],
-      "versioning": "redhat"
+      "versioning": "redhat",
+      "automerge": true,
+      "automergeStrategy": "merge",
+      "labels": ["chore"]
     },
     {
       "matchDatasources": ["rpm"],
@@ -25,7 +28,24 @@
     },
     {
       "matchManagers": ["github-actions"],
-      "groupName": "github actions"
+      "groupName": "github actions",
+      "automerge": true,
+      "automergeStrategy": "merge",
+      "labels": ["chore"]
+    },
+    {
+      "description": "Carried app — human review per #221: broad behavior space CI only samples",
+      "matchDepNames": ["pi-hole/pi-hole", "pi-hole/FTL"],
+      "groupName": "pihole app",
+      "automerge": false
+    },
+    {
+      "description": "Chore pins — merge on green per #221: narrow, CI-observable breakage modes",
+      "matchDepNames": ["pi-hole/web", "busybox", "bash", "curl", "iproute", "logrotate", "tzdata", "sudo"],
+      "groupName": "pihole chores",
+      "automerge": true,
+      "automergeStrategy": "merge",
+      "labels": ["chore"]
     }
   ],
   "customManagers": [
