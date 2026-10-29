@@ -10,7 +10,7 @@
       "matchPackageNames": ["registry.access.redhat.com/hi/**"],
       "versioning": "redhat",
       "automerge": true,
-      "automergeStrategy": "merge",
+      "automergeStrategy": "merge-commit",
       "labels": ["chore"]
     },
     {
@@ -30,7 +30,7 @@
       "matchManagers": ["github-actions"],
       "groupName": "github actions",
       "automerge": true,
-      "automergeStrategy": "merge",
+      "automergeStrategy": "merge-commit",
       "labels": ["chore"]
     },
     {
@@ -44,7 +44,7 @@
       "matchDepNames": ["pi-hole/web", "busybox", "bash", "curl", "iproute", "logrotate", "tzdata", "sudo"],
       "groupName": "pihole chores",
       "automerge": true,
-      "automergeStrategy": "merge",
+      "automergeStrategy": "merge-commit",
       "labels": ["chore"]
     }
   ],
