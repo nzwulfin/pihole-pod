@@ -51,7 +51,7 @@ jobs:
         uses: redhat-actions/podman-login@v2
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
+          username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Establish DNS ground truth
@@ -71,7 +71,7 @@ jobs:
             --pod test-pod \
             --name test-unbound \
             --cap-add CAP_NET_ADMIN \
-            ghcr.io/${{ github.actor }}/unbound:${{ env.UNBOUND_TAG }}
+            ghcr.io/${{ github.repository_owner }}/unbound:${{ env.UNBOUND_TAG }}
           sleep 3
 
       - name: Start pihole
@@ -83,7 +83,7 @@ jobs:
             --cap-add CAP_NET_RAW \
             -e FTLCONF_webserver_api_password=test \
             -e FTLCONF_dns_upstreams=127.0.0.1#5335 \
-            ghcr.io/${{ github.actor }}/pihole:${{ env.PIHOLE_TAG }}
+            ghcr.io/${{ github.repository_owner }}/pihole:${{ env.PIHOLE_TAG }}
 
       - name: Wait for DNS to be ready
         run: |
@@ -135,6 +135,6 @@ jobs:
         run: |
           skopeo copy \
             --authfile $HOME/.docker/config.json \
-            docker://ghcr.io/${{ github.actor }}/${{ env.NEW_IMAGE }}:${{ env.SHA }} \
-            docker://ghcr.io/${{ github.actor }}/${{ env.NEW_IMAGE }}:latest
+            docker://ghcr.io/${{ github.repository_owner }}/${{ env.NEW_IMAGE }}:${{ env.SHA }} \
+            docker://ghcr.io/${{ github.repository_owner }}/${{ env.NEW_IMAGE }}:latest
 

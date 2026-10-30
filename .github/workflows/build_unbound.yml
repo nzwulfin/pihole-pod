@@ -22,11 +22,11 @@ jobs:
       # Destination registry for built images
       DEST_REGISTRY_HOST: "ghcr.io"
       # Destination credentials - uses platform variables and secrets
-      DEST_REGISTRY_USER: "${{ github.actor }}"
+      DEST_REGISTRY_USER: "${{ github.repository_owner }}"
       DEST_REGISTRY_PASSWORD: "${{ secrets.GITHUB_TOKEN }}"
 
       # Destination image namespace and name (eg: myrepo/myimage)
-      DEST_IMAGE: "${{ github.actor }}/unbound"
+      DEST_IMAGE: "${{ github.repository_owner }}/unbound"
 
     permissions:
       contents: write
