@@ -84,7 +84,7 @@ ARG BASH_PKG_VERSION=5.3.20-1.hum1
 # renovate: datasource=rpm depName=curl
 ARG CURL_VERSION=8.23.0-0.1.hum1
 # renovate: datasource=rpm depName=iproute
-ARG IPROUTE_VERSION=7.2.0-1.1.hum1
+ARG IPROUTE_VERSION=7.3.0-2.hum1
 # renovate: datasource=rpm depName=logrotate
 ARG LOGROTATE_VERSION=3.22.0-6.1.hum1
 # renovate: datasource=rpm depName=tzdata
