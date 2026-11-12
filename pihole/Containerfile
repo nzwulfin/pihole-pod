@@ -4,9 +4,9 @@ FROM registry.access.redhat.com/hi/core-runtime:latest-builder AS builder
 USER root
 
 # renovate: datasource=github-releases depName=pi-hole/FTL
-ARG FTL_VERSION=v6.8
+ARG FTL_VERSION=v6.9
 # renovate: datasource=github-releases depName=pi-hole/pi-hole
-ARG PIHOLE_CORE_VERSION=v6.5
+ARG PIHOLE_CORE_VERSION=v6.6
 # renovate: datasource=github-releases depName=pi-hole/web
 ARG PIHOLE_WEB_VERSION=v6.6.1
 
@@ -89,8 +89,8 @@ ARG IPROUTE_VERSION=7.3.0-2.hum1
 ARG LOGROTATE_VERSION=3.22.0-6.1.hum1
 # renovate: datasource=rpm depName=tzdata
 ARG TZDATA_VERSION=2026f-1.hum1
-# renovate: datasource=rpm depName=sudo
-ARG SUDO_VERSION=1.9.17-16.p2.3.hum1
+# renovate: datasource=rpm depName=util-linux
+ARG UTIL_LINUX_VERSION=2.42.4-2.1.hum1
 
 RUN --mount=type=bind,from=registry.access.redhat.com/hi/core-runtime:latest-builder,target=/builder \
     LD_LIBRARY_PATH=/builder/lib64:/builder/usr/lib64 \
@@ -106,12 +106,10 @@ RUN --mount=type=bind,from=registry.access.redhat.com/hi/core-runtime:latest-bui
     iproute-${IPROUTE_VERSION} \
     logrotate-${LOGROTATE_VERSION} \
     tzdata-${TZDATA_VERSION} \
-    sudo-${SUDO_VERSION}
+    util-linux-${UTIL_LINUX_VERSION}
 
 RUN echo "pihole:x:1000:1000:Pi-hole:/:/sbin/nologin" >> /etc/passwd \
     && echo "pihole:x:1000:" >> /etc/group
-
-COPY --chmod=0440 pihole.sudoers /etc/sudoers.d/pihole
 
 # Busybox provides find, sed, and awk but the RPM does not create symlinks.
 # Create them here so upstream pi-hole scripts (gravity.sh etc.) can call these
