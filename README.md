@@ -1,3 +1,7 @@
+[![Build pihole](https://github.com/nzwulfin/pihole-pod/actions/workflows/build_pihole.yml/badge.svg?branch=main)](https://github.com/nzwulfin/pihole-pod/actions/workflows/build_pihole.yml)
+[![Build unbound](https://github.com/nzwulfin/pihole-pod/actions/workflows/build_unbound.yml/badge.svg?branch=main)](https://github.com/nzwulfin/pihole-pod/actions/workflows/build_unbound.yml)
+[![Pod integration](https://github.com/nzwulfin/pihole-pod/actions/workflows/integrate_pod.yml/badge.svg?branch=main)](https://github.com/nzwulfin/pihole-pod/actions/workflows/integrate_pod.yml)
+
 # pihole-pod
 
 Pi-hole DNS sinkhole running on RHHI `core-runtime` with an RHHI `unbound` recursive resolver sidecar as a Podman quadlet.
